@@ -358,13 +358,13 @@ def smiles_DFT_calc(root_dir='first_xtb',
     """Through Xtb results, optimize the Gaussian optimization input file
 
     Args:
-        root_dir (str, optional): Xtb的根目录. Defaults to 'first_xtb'.
+        root_dir (str, optional): Root directory of Xtb. Defaults to 'first_xtb'.
         mol_dir (str, optional): Directory of Mol molecules. Defaults to 'mol'.
         dft_dir (str, optional): Directory to store Gaussian input files. Defaults to 'mol_dft'.
         method (str, optional): Gaussian method. Defaults to "opt freq b3lyp/6-31g* em=gd3bj".
         conf_limit (int, optional): Limit on the number of converters that Xtb can read from the structure. Defaults to 3.
         rmsd_limit (float, optional): RMSD limit for Xtb read structures. Defaults to 1.5.
-        SpinMultiplicity (int, optional): 设定的spin multiplicity. Defaults to None.
+        SpinMultiplicity (int, optional): Specified spin multiplicity. Defaults to None.
     """                    
     all_files = glob.glob(root_dir + "/*/*/*")
     for xtb_file in all_files:
@@ -842,7 +842,7 @@ def draw_heatmap(x_labels, y_labels, values, title="None", figure_size=(40, 6), 
     # model_labels = ["GB", "XGB", "RF", "ET", "AdaB", "Line", "MLP"]
     # model_labels = ["no_product", "with_product", "with_structure"]
 
-    plt.rcParams['font.sans-serif']='Arial'#Set Chinese display, must be placed after sns.set
+    plt.rcParams['font.sans-serif']='Arial'#Set font, must be placed after sns.set
 
     uniform_data = values #Set up a 2D matrix
     f, ax = plt.subplots(figsize=figure_size)
