@@ -19,7 +19,7 @@ atom_num = [None, "H", "He", "Li", "Be", "B", "C", "N", "O", "F",
 
 
 def mol_add_Hs(molfile):
-    """给molfile文件补氢
+    """Add hydrogen atoms to the molfile file
 
     Args:
         molfile (_type_): _description_
@@ -32,20 +32,20 @@ def mol_add_Hs(molfile):
 
 def group_atoms(coordinates, threshold):
     """
-    只给出原子坐标的情况下，把原子按照设定的坐标间距阈值划分成若干组，适用于识别过渡态的两部分。
+    Given only atomic coordinates, divide atoms into several groups based on a set coordinate distance threshold; suitable for identifying the two parts of a transition state.
     
-    参数：
-    - coordinates: N x 3 的 NumPy 数组，表示 N 个原子的坐标。
-    - threshold: 阈值，表示两个原子之间的距离不超过该值时，这两个原子应该被划分到同一组中。
+    Parameters:
+    - coordinates: N x 3 NumPy array representing the coordinates of N atoms.
+    - threshold: Threshold; if the distance between two atoms does not exceed this value, they should be assigned to the same group.
     
-    返回值：
-    - 一个包含若干组的列表，每一组由若干原子的序号构成。
+    Returns:
+    - A list containing several groups, each consisting of the indices of several atoms.
     """
-    # 构建 KD 树
+    # Build KDTree
     from scipy.spatial import KDTree
     tree = KDTree(coordinates)
 
-    # 查找近邻点
+    # Search for nearest neighbors
     groups = []
     visited = set()
     for i in range(len(coordinates)):
@@ -66,7 +66,7 @@ def group_atoms(coordinates, threshold):
     return groups
 
 def move(a):
-    """将三位旋转平移矩阵a转化为四维旋转平移矩阵
+    """Convert a 3D rotation-translation matrix 'a' into a 4D rotation-translation matrix
 
     Args:
         a (iterable): 
@@ -78,10 +78,10 @@ def move(a):
     return np.array([[1, 0, 0, x], [0, 1, 0, y], [0, 0, 1, z], [0, 0, 0, 1]])
 
 def rotation(a, sin, cos):
-    """生成4维矩阵，与之相乘能沿a轴旋转sin，cos角度
+    """Generate a 4D matrix that, when multiplied, rotates along the 'a' axis by sin and cos angles
 
     Args:
-        a (array): 3维
+        a (array): 3D
         sin (float): 
         cos (float): 
 
@@ -99,13 +99,13 @@ def rotation(a, sin, cos):
                      [0, 0, 0, 1]])
 
 def trfm_rot(a, b, c, position=[], center_point=np.array([0, 0, 0])):
-    """针对a,b,c三点，平移旋转使ab矢量平行于x轴，a,b,c在xoy平面上，a,b关于center_point对称
+    """For points a, b, and c, perform translation and rotation so that the ab vector is parallel to the x-axis, a, b, and c are on the xoy plane, and a and b are symmetric about center_point
 
     Args:
-        a (_type_): 3维坐标，最后会位于x轴负方向
-        b (_type_): 3维坐标，最后会位于x轴正方向
-        c (_type_): 3维坐标，调整后其y轴坐标为正，z轴坐标为0
-        position (list, optional): 如果给定了position就会输出转化后的position，没有则输出旋转平移矩阵. Defaults to [].
+        a (_type_): 3D coordinates, ultimately located in the negative x-axis direction
+        b (_type_): 3D coordinates, ultimately located in the positive x-axis direction
+        c (_type_): 3D coordinates, after adjustment its y-axis coordinate is positive and z-axis coordinate is 0
+        position (list, optional): If position is given, outputs the transformed position; otherwise, outputs the rotation-translation matrix. Defaults to [].
         center_point (_type_, optional): _description_. Defaults to np.array([0, 0, 0]).
 
     Returns:
@@ -152,11 +152,11 @@ def trfm_rot(a, b, c, position=[], center_point=np.array([0, 0, 0])):
     return up_position
 
 def rot_mol(mol, axis=np.array([0, 1, 0]), sin=0, cos=-1):
-    """旋转分子的所有构象，默认围绕y轴旋转180°
+    """Rotate all conformations of the molecule, default 180° around the y-axis
 
     Args:
         mol (_type_): _description_
-        axis (array, optional): 转轴. Defaults to np.array([0, 1, 0]).
+        axis (array, optional): Rotation axis. Defaults to np.array([0, 1, 0]).
         sin (int, optional): _description_. Defaults to 0.
         cos (int, optional): _description_. Defaults to -1.
 
@@ -176,7 +176,7 @@ def rot_mol(mol, axis=np.array([0, 1, 0]), sin=0, cos=-1):
 
 
 def move_mol(mol, array=np.array([0, 0, 1.5])):
-    """移动分子的所有构象，默认向z轴移动1.5个单位（ene）
+    """Move all conformations of the molecule, default 1.5 units along the z-axis
 
     Args:
         mol (_type_): _description_
@@ -196,13 +196,13 @@ def move_mol(mol, array=np.array([0, 0, 1.5])):
     return react1
 
 def check_double_bond_ZE(mol, old_position, new_position, ignore=[]):
-    """检查前后双键的ZE是否发生了变化
+    """Check whether the ZE configuration of the double bond changed between before and after
 
     Args:
-        mol (_type_): mol分子
-        old_position (_type_): 前面的坐标
-        new_position (_type_): 后面的坐标
-        ignore (list, optional): 需要忽略的原子编号列表. Defaults to [].
+        mol (_type_): mol molecule
+        old_position (_type_): Original coordinates
+        new_position (_type_): New coordinates
+        ignore (list, optional): List of atom indices to ignore. Defaults to [].
 
     Returns:
         _type_: _description_
@@ -240,10 +240,10 @@ def check_double_bond_ZE(mol, old_position, new_position, ignore=[]):
 
 def eng_to_om(log_file:logfile_process.Logfile, diene_mol, new_dir="om", assert_title=None, write_gjf=True, distance=2.1, 
 method='opt=modredundant freq b3lyp/6-31g(d) em=gd3bj', target_cos = -0.9396926, difreeze=True):
-    """将后体优化log结果读取，拉长反应键，限制性优化
+    """Read the log result of post-optimization, stretch the reaction bond, and perform constrained optimization
 
     Args:
-        file_name (str, optional): 设定的. Defaults to "../file/test6/TSa_opt_0.log".
+        file_name (str, optional): Specified. Defaults to "../file/test6/TSa_opt_0.log".
     """    
     new_name = os.path.split(log_file.file_dir)[-1].split(".")[0] + ".gjf"
     newfile = new_dir + "/" + new_name 
@@ -261,20 +261,20 @@ method='opt=modredundant freq b3lyp/6-31g(d) em=gd3bj', target_cos = -0.9396926,
     dieno_point1 = position[dieno_num1 + start]
     dieno_point2 = position[dieno_num2 + start]
 
-    # 平面定位
+    # Plane localization
     new_position = trfm_rot(diene_point1, diene_point2, (dieno_point1 + dieno_point2)/2, position)
     diene_center_point = (
         new_position[diene_num1] + new_position[diene_num2])/2
     dieno_center_point = (
         new_position[dieno_num1 + start] + new_position[dieno_num2 + start])/2
     y_distance = distance - np.sqrt((diene_center_point - dieno_center_point)
-                                @ (diene_center_point - dieno_center_point).T)# 所需拉伸的距离
+                                @ (diene_center_point - dieno_center_point).T)# Required stretching distance
     diene_position = new_position[:start]
     dieno_position = new_position[start:]
-    # 拉伸
+    # Stretching
     move_matrix = move(np.array([0, y_distance, 0]))
     dieno_position = (move_matrix @ dieno_position.T).T
-    # 旋转至同一平面
+    # Rotate to the same plane
     diene_array = diene_position[diene_num1] - diene_position[diene_num2]
     dieno_array = dieno_position[dieno_num1] - dieno_position[dieno_num2]
     law_array = np.cross(diene_array[:3], dieno_array[:3])
@@ -284,7 +284,7 @@ method='opt=modredundant freq b3lyp/6-31g(d) em=gd3bj', target_cos = -0.9396926,
     diene_position = (rot_matrix @ diene_position.T).T
     new_position = np.append(diene_position, dieno_position, axis=0)
     new_position = np.array([each[:3] for each in new_position])
-    # 重新定位
+    # Relocalize
     diene_point1 = new_position[diene_num1]
     diene_point2 = new_position[diene_num2]
     dieno_point1 = new_position[dieno_num1 + start]
@@ -302,7 +302,7 @@ method='opt=modredundant freq b3lyp/6-31g(d) em=gd3bj', target_cos = -0.9396926,
     # print(diene_point3)
     new2_position = trfm_rot(diene_point1, diene_point2, diene_point3, new_position)
     # new2_position = np.array([each[:3] for each in new2_position])
-    # 求角度
+    # Calculate angle
     diene_point1 = new2_position[diene_num1][:3]
     diene_point2 = new2_position[diene_num2][:3]
     dieno_point1 = new2_position[dieno_num1 + start][:3]
@@ -322,7 +322,7 @@ method='opt=modredundant freq b3lyp/6-31g(d) em=gd3bj', target_cos = -0.9396926,
         dieno_position = (rot_matrix @ dieno_position.T).T
         new2_position = np.append(diene_position, dieno_position, axis=0)
 
-        # 移动取代基
+        # Move substituents
         if cos < 0.5:
             cos = 0.5
             sin = -np.sqrt(1-cos ** 2)
@@ -350,10 +350,10 @@ method='opt=modredundant freq b3lyp/6-31g(d) em=gd3bj', target_cos = -0.9396926,
 
 def om_to_om2(log_file:logfile_process.Logfile, diene_mol, new_dir="om", assert_title=None, write_gjf=True, distance=1.9, 
 method='opt=modredundant freq b3lyp/6-31g(d) em=gd3bj', target_cos = -np.sqrt(3)/2, difreeze = True):
-    """将后体优化log结果读取，拉长反应键，限制性优化
+    """Read the log result of post-optimization, stretch the reaction bond, and perform constrained optimization
 
     Args:
-        file_name (str, optional): 设定的. Defaults to "../file/test6/TSa_opt_0.log".
+        file_name (str, optional): Specified. Defaults to "../file/test6/TSa_opt_0.log".
     """    
     new_name = os.path.split(log_file.file_dir)[-1].split(".")[0] + ".gjf"
     newfile = new_dir + "/" + new_name 
@@ -368,7 +368,7 @@ method='opt=modredundant freq b3lyp/6-31g(d) em=gd3bj', target_cos = -np.sqrt(3)
     diene_num1, diene_num2, dieno_num1, dieno_num2, start = [
         int(each) for each in title][:5]
 
-    # 重新定位
+    # Relocalize
     diene_point1 = position[diene_num1]
     diene_point2 = position[diene_num2]
     dieno_point1 = position[dieno_num1 + start]
@@ -387,7 +387,7 @@ method='opt=modredundant freq b3lyp/6-31g(d) em=gd3bj', target_cos = -np.sqrt(3)
     # print(diene_point3)
     new2_position = trfm_rot(diene_point1, diene_point2, diene_point3, position)
     # new2_position = np.array([each[:3] for each in new2_position])
-    # 求角度
+    # Calculate angle
     diene_point1 = new2_position[diene_num1][:3]
     diene_point2 = new2_position[diene_num2][:3]
     dieno_point1 = new2_position[dieno_num1 + start][:3]
@@ -426,13 +426,13 @@ method='opt=modredundant freq b3lyp/6-31g(d) em=gd3bj', target_cos = -np.sqrt(3)
 
 def om_to_ts(log_file:logfile_process.Logfile, write_gjf=True, new_dir="ts",
     method="opt=(calcfc,ts,noeigen) freq b3lyp/6-31g* em=gd3bj"):
-    """将Gaussian限制性优化的输出文件转化为过渡态计算的输入文件或者输入信息
+    """Convert Gaussian constrained optimization output file into transition state calculation input file or information
 
     Args:
-        log_file (logfile_process.Logfile): log文件
-        write_gjf (bool, optional): 是否直接写输入文件. Defaults to True.
-        new_dir (str, optional): 过渡态输入文件的存放地址. Defaults to "ts".
-        method (str, optional): #p行. Defaults to "opt=(calcfc,ts,noeigen) freq b3lyp/6-31g* em=gd3bj".
+        log_file (logfile_process.Logfile): log file
+        write_gjf (bool, optional): Whether to write the input file directly. Defaults to True.
+        new_dir (str, optional): Address for storing transition state input files. Defaults to "ts".
+        method (str, optional): #p line. Defaults to "opt=(calcfc,ts,noeigen) freq b3lyp/6-31g* em=gd3bj".
 
     Returns:
         _type_: _description_
@@ -493,7 +493,7 @@ def ts_to_irc(log_file:logfile_process.Logfile, new_dir):
 #                  method=method)
 
 def smiles2mol(smiles, conf_num=20):
-    """smiles 转化为mol，包含AddHs和Embed的3D结构生成
+    """SMILES to mol conversion, including AddHs and Embed 3D structure generation
 
     Args:
         smiles (str): _description_
@@ -522,7 +522,7 @@ def add_conformer(mol, conf_num=50):
     return mol
 
 def find_sustation_group(mol, mother_atom:int, ignore_atoms = []):
-    """给定取代基原子mother_atom， 和母体原子ignore_atoms，找到取代基上面的所有原子
+    """Given substituent atom mother_atom and backbone atoms ignore_atoms, find all atoms on the substituent
 
     Args:
         mol (_type_): _description_
@@ -541,7 +541,7 @@ def find_sustation_group(mol, mother_atom:int, ignore_atoms = []):
     return all_atoms
 
 def read_reactant(csvfile, index_lists=None):
-    """读取指定的.csv,存储了diene/ene的编号（Index），smiles和能量
+    """Read specified .csv storing diene/ene Index, SMILES, and energy
 
     Args:
         csvfile (_type_): _description_
@@ -558,7 +558,7 @@ def read_reactant(csvfile, index_lists=None):
     return smiles, energy
 
 def GetAtomIdxBetweenBonds(mol, bond1, bond2):
-    """判断连着指定两根键的原子
+    """Identify the atom connected to two specified bonds
 
     Args:
         mol (Chem.Mol): molecule
@@ -578,28 +578,28 @@ def GetAtomIdxBetweenBonds(mol, bond1, bond2):
 
 def stretch_bond(coords, a, b, move_ids, x):
     """
-    将分子中move_ids原子 沿着原子 a-b 的方向拉伸至当前键长的 x 倍。
+    Stretch move_ids atoms in the molecule along the a-b atom direction to x times the current bond length.
 
-    参数：
-    coords: 一个 N×3 的二维数组，表示所有原子的坐标。
-    a: 要拉伸的原子 a 的编号。
-    b: 要拉伸的原子 b 的编号。
-    x: 拉伸倍数。
+    Parameters:
+    coords: An N×3 2D array representing coordinates of all atoms.
+    a: Index of atom a to be stretched.
+    b: Index of atom b to be stretched.
+    x: Stretching factor.
 
-    返回值：
-    一个新的 N×3 的二维数组，表示拉伸后的所有原子的坐标。
+    Returns:
+    A new N×3 2D array representing coordinates of all atoms after stretching.
     """
-    # 计算 a 和 b 之间的距离和方向向量
+    # Calculate the distance and direction vector between a and b
     vec_ab = coords[b] - coords[a]
     dist_ab = np.linalg.norm(vec_ab)
 
-    # 计算拉伸后的距离和拉伸比例，并计算新位置
+    # Calculate the stretched distance and stretch ratio, and calculate the new position
     dist_new = dist_ab * x
     scale = dist_new / dist_ab
     new_pos_b = coords[a] + vec_ab * scale
     move_vec = new_pos_b - coords[b]
 
-    # 构造新的坐标矩阵并返回
+    # Construct a new coordinates matrix and return
     new_coords = np.array(coords)
     for id, each in enumerate(new_coords):
         if id in move_ids:
@@ -608,36 +608,36 @@ def stretch_bond(coords, a, b, move_ids, x):
 
 def shortest_distance(coords):
     """
-    计算给定分子中任意两个原子之间的最短距离。
+    Calculate the shortest distance between any two atoms in a given molecule.
 
-    参数：
-    coords: N×3 的 numpy 数组，表示所有原子的坐标。
+    Parameters:
+    coords: N×3 numpy array representing coordinates of all atoms.
 
-    返回值：
-    分子中任意两个原子之间的最短距离。
+    Returns:
+    The shortest distance between any two atoms in the molecule.
     """
-    # 计算原子间距离矩阵
+    # Calculate distance matrix between atoms
     diff = coords[:, np.newaxis, :] - coords[np.newaxis, :, :]
     dist_mat = np.linalg.norm(diff, axis=-1)
 
-    # 忽略对角线元素并取上三角部分
+    # Ignore the diagonal elements and take the upper triangular part
     upper_dist_mat = np.triu(dist_mat, k=1)
 
-    # 找到最小的非零距离值作为最短距离
+    # Find the smallest non-zero distance value as the shortest distance
     min_dist = np.amin(upper_dist_mat[upper_dist_mat > 0])
 
     return min_dist
 
 def error_improve(target_dir, mol_dir, file_name, dust_bin='dust_bin', improve_dir='improve', bond_attach_std='mol', maxcycles=0, method=None, bond_addition_function=None, bond_ignore_list=None, Inv_dir = 'Inv3', yqc_dir = 'yqc'):
-    """与log_process模块配合，对Gaussian的输出文件进行错误识别和修改，处理虚频问题。
-    会将修改后的输入文件和算错/有虚频的输出文件挪到指定文件夹。
+    """Cooperate with log_process module to identify and modify Gaussian output files and handle imaginary frequency issues.
+    Modified input files and error/imaginary frequency output files will be moved to specified folders.
 
     Args:
-        target_dir (str): 根目录
-        mol_dir (_type_): Mol分子对应的目录
-        file_name (_type_): 根目录下存放有Gaussian输出文件的文件夹
-        dust_bin (str, optional): 无药可救的输出文件的垃圾桶. Defaults to 'dust_bin'.
-        improve_dir (str, optional): 修改后的Gaussian输入文件存放地址. Defaults to 'improve'.
+        target_dir (str): Root directory
+        mol_dir (_type_): Directory corresponding to Mol molecules
+        file_name (_type_): Folder under the root directory containing Gaussian output files
+        dust_bin (str, optional): Trash bin for unsalvageably erroneous output files. Defaults to 'dust_bin'.
+        improve_dir (str, optional): Storage path for modified Gaussian input files. Defaults to 'improve'.
     """    
     opt_file_dir = target_dir + "/" + file_name
     dust_bin_dir = target_dir + "/" + dust_bin

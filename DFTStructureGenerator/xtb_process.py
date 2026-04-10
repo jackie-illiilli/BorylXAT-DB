@@ -8,16 +8,16 @@ from . import mol_manipulation
 
 
 def xtb_to_mol(mol, atoms, positions, conf_limit):
-    """把原子坐标更新到mol分子里面，删除其中原有的构象，新增加一批构象
+    """Update atomic coordinates into the mol object, delete original conformations, and add a new batch of conformations
 
     Args:
-        mol (Chem.Mol): 原始的mol分子
-        atoms (list): 元素符号的列表
-        positions (__iterable__): 多个原子坐标(m*n*3)
-        conf_limit (int): 数量限制，只读取前conf_limit个坐标
+        mol (Chem.Mol): Original mol object
+        atoms (list): List of element symbols
+        positions (__iterable__): Multiple atomic coordinates (m*n*3)
+        conf_limit (int): Quantity limit, only read the first conf_limit coordinates
 
     Returns:
-        Chem.Mol: 带有更新坐标的分子
+        Chem.Mol: Molecule with updated coordinates
     """    
     num_conformers = mol.GetNumConformers()
     for i in range(num_conformers):
@@ -32,12 +32,12 @@ def xtb_to_mol(mol, atoms, positions, conf_limit):
     return mol
 
 def xtb_update_mol(mol, xtbfile, conf_limit = 3, rmsd_limit=1.5):
-    """从xtb输出文件(.xyz)中读取构象，根据设定的rmsd阈值和设定的构象数量限制，更新构象
+    """Read conformations from xtb output file (.xyz), and update conformations based on the set RMSD threshold and quantity limit
 
     Args:
         mol (Chem.Mol): 
-        xtbfile (str): xtb输出文件(.xyz)
-        conf_limit: 数量限制，只读取前conf_limit个坐标
+        xtbfile (str): xtb output file (.xyz)
+        conf_limit: Quantity limit, only read the first conf_limit coordinates
 
     Returns:
         mol: Chem.Mol with new positions
@@ -88,7 +88,7 @@ def xtb_other_atoms(rest_atoms, all_num):
 
 def xtb_write_xyz(mol, atom_list=None, position_list=None, xtb_dir='xtb_process/', smiles_name='test', dist_rest=None):
     """
-    生成xtb优化文件：对mol的每一个构象，在id_%.8d_%d的文件夹中生成xtb优化文件
+    Generate xtb optimization files: for each conformation of mol, generate an xtb optimization file in the id_%.8d_%d folder
     parents of mol_to_xyz()
 
     Args:
@@ -133,13 +133,13 @@ def xtb_write_xyz(mol, atom_list=None, position_list=None, xtb_dir='xtb_process/
     return file_dirs
 
 def write_xtb_pbs(pbs_path, charge, que="gamma", root_dir='charg_0', uhf=0):
-    """xtb运行的shell脚本生成工具，适用于PBS队列的超算
+    """xtb shell script generation tool, suitable for supercomputers with PBS queues
 
     Args:
-        pbs_path (_type_): 脚本的文件地址
+        pbs_path (_type_): File path of the script
         charge (_type_): Charge of Mols.
         que (str, optional): _description_. Defaults to "gamma".
-        root_dir (str, optional): 存放同时计算的Xtb任务的父目录. Defaults to 'charg_0'.
+        root_dir (str, optional): Parent directory for concurrent xtb tasks. Defaults to 'charg_0'.
     """    
     with open(pbs_path, "wt", newline="\n") as f:
         f.write("#!/bin/bash\n#PBS -l nodes=1:ppn=28\n#PBS -l walltime=99:00:00\n#PBS -N crest-\n#PBS -q %s\n#PBS -j oe\n#PBS -o jobID.$PBS_JOBID\n" % que)
@@ -150,15 +150,15 @@ def write_xtb_pbs(pbs_path, charge, que="gamma", root_dir='charg_0', uhf=0):
         f.write("done")
 
 def xtb_main_2(smiles_names, smileses, restrict = None, dir_path='xtb_process', que="gamma", charges = None, uhfs = None):
-    """    !! 主流程
-    适用于电荷数不同和单电子数不同的任务
+    """    !! Main Process
+    Suitable for tasks with different charges and number of unpaired electrons
     Args:
-        smiles_names: 每一个smiles的识别文件名
+        smiles_names: Identification filename for each SMILES
         smileses (_type_): smiles or mols
         dir_path (str, optional): root dir saved charge files. Defaults to 'xtb_process'.
-        que (str, optional): 超算队列. Defaults to "gamma".
-        charges: 电荷表。
-        uhfs: 单电子表
+        que (str, optional): Supercomputer queue. Defaults to "gamma".
+        charges: Table of charges.
+        uhfs: Table of unpaired electrons
     """    
 
     if os.path.isdir(dir_path):
@@ -197,17 +197,17 @@ def xtb_main_2(smiles_names, smileses, restrict = None, dir_path='xtb_process', 
             now_id += 1
 
 def xtb_main(smiles_names, smileses, restrict = None, dir_path='xtb_process', que="gamma", core=1, uhf=0):
-    """    !! 主流程
-    对于smileses的所有分子，按照电荷进行归类，提交到多个节点。
-    suball是总提交脚本，运行其即可
+    """    !! Main Process
+    Classify all molecules for SMILES by charge and submit to multiple nodes.
+    suball is the master submission script; just run it
 
     Args:
-        smiles_names: 每一个smiles的识别文件名
+        smiles_names: Identification filename for each SMILES
         smileses (_type_): smiles or mols
         dir_path (str, optional): root dir saved charge files. Defaults to 'xtb_process'.
-        que (str, optional): 超算队列. Defaults to "gamma".
-        core(int): 要提交到多少个不同节点计算。
-        uhf(int): 单电子数
+        que (str, optional): Supercomputer queue. Defaults to "gamma".
+        core(int): Number of different nodes to submit calculations to.
+        uhf(int): Number of unpaired electrons
     """    
 
     if os.path.isdir(dir_path):
@@ -255,13 +255,13 @@ def xtb_main(smiles_names, smileses, restrict = None, dir_path='xtb_process', qu
                 f.write("qsub %s\n" % "xtb_%d_%d.pbs" % (eachcharge, 0))
 
 def check_xtb_normal(root_dir):
-    """一次检查指定目录下所有子目录下所有Xtb文件计算是否成功
+    """Check once whether all xtb file calculations in all subdirectories under the specified directory are successful
 
     Args:
         root_dir (_type_): _description_
 
     Returns:
-        Bool: 是否全部成功
+        Bool: Whether all are successful
     """    
     error_code = 0
     wait_check_dir = glob.glob(root_dir + "/*/*")
@@ -278,7 +278,7 @@ def check_xtb_normal(root_dir):
         return False
 
 def read_xyz(file_dir):
-    """把.xyz文件中所有的原子坐标全部都提取出来
+    """Extract all atomic coordinates from the .xyz file
     Args:
         file_dir (str): file_dir endwith .xyz
 
@@ -309,13 +309,13 @@ def read_xyz(file_dir):
     return atom_list, positions
 
 def xtb_is_success(xtb_dir):
-    """检查单个xtb任务是否成功
+    """Check whether a single xtb task is successful
 
     Args:
         xtb_dir (_type_): 
 
     Returns:
-        Bool: 是否成功
+        Bool: Whether successful
     """    
     if os.path.isfile(xtb_dir + '/crest.out'):
         with open(xtb_dir + '/crest.out', "rt", encoding='UTF-8') as f:
@@ -326,17 +326,17 @@ def xtb_is_success(xtb_dir):
     return False
 
 def after_xtb(mol, xtb_dir="xtb_process", save_dir="xtb_result", conf_limit=3, rmsd_limit=1.5, xtb_title=None, method="opt freq b3lyp/6-31g* em=gd3bj g09def", SpinMultiplicity=None, charge=None):
-    """给定指定的mol分子，在xtb_dir下寻找对应的任务，按照设定的阈值和数量限制产生Gaussian的初始文件
+    """Given a specified mol molecule, find the corresponding task under xtb_dir, and generate Gaussian input files according to the set threshold and quantity limit
 
     Args:
         mol (Chem.Mol): mol
-        xtb_dir (str, optional): xtb任务的根目录. Defaults to "xtb_process".
-        save_dir (str, optional): Gaussian输入文件存储的目录. Defaults to "xtb_result".
-        conf_limit (int, optional): 数量限制. Defaults to 3.
-        rmsd_limit (float, optional): rmsd阈值. Defaults to 1.5.
-        xtb_title (_type_, optional): Gaussian输入文件的title. Defaults to None.
-        method (str, optional): Gaussian的方法. Defaults to "opt freq b3lyp/6-31g* em=gd3bj g09def".
-        SpinMultiplicity (_type_, optional): 自旋多重度. Defaults to None.
+        xtb_dir (str, optional): Root directory for xtb tasks. Defaults to "xtb_process".
+        save_dir (str, optional): Directory to store Gaussian input files. Defaults to "xtb_result".
+        conf_limit (int, optional): Quantity limit. Defaults to 3.
+        rmsd_limit (float, optional): RMSD threshold. Defaults to 1.5.
+        xtb_title (_type_, optional): Title for Gaussian input files. Defaults to None.
+        method (str, optional): Gaussian method. Defaults to "opt freq b3lyp/6-31g* em=gd3bj g09def".
+        SpinMultiplicity (_type_, optional): Spin multiplicity. Defaults to None.
     """
     mol_str = os.path.split(xtb_dir)[-1][:-2]
     if charge == None:
@@ -356,13 +356,13 @@ def after_xtb(mol, xtb_dir="xtb_process", save_dir="xtb_result", conf_limit=3, r
 
 
 def shift_to_sugan(target_file, quene_id = 1,chrg=0, uhf=0):
-    """将提交脚本和总提交脚本改成适用于曙光超算合肥中心的格式。
+    """Convert submission script and master script to formats suitable for Dawning Supercomputer Hefei Center.
 
     Args:
-        target_file (_type_): Xtb文件的根目录
-        quene_id (int, optional): 曙光合肥中心的队列编号. Defaults to 1.
-        chrg (int, optional): 电荷. Defaults to 0.
-        uhf (int, optional): 单电子数. Defaults to 0.
+        target_file (_type_): Root directory of xtb files
+        quene_id (int, optional): Queue ID for Dawning Hefei Center. Defaults to 1.
+        chrg (int, optional): Charge. Defaults to 0.
+        uhf (int, optional): Number of unpaired electrons. Defaults to 0.
     """    
     pbs_files = glob.glob(target_file + '/*.pbs')
     for pbs_file in pbs_files:
@@ -376,11 +376,11 @@ def shift_to_sugan(target_file, quene_id = 1,chrg=0, uhf=0):
             f.write("sbatch %s\n" % name)
 
 def shift_to_sugan_2(target_file, quene_id = 1):
-    """将提交脚本和总提交脚本改成适用于曙光超算合肥中心的格式。
+    """Convert submission script and master script to formats suitable for Dawning Supercomputer Hefei Center.
 
     Args:
-        target_file (_type_): Xtb文件的根目录
-        quene_id (int, optional): 曙光合肥中心的队列编号. Defaults to 1.
+        target_file (_type_): Root directory of xtb files
+        quene_id (int, optional): Queue ID for Dawning Hefei Center. Defaults to 1.
     """    
     pbs_files = glob.glob(target_file + '/*.pbs')
     for pbs_file in pbs_files:
@@ -396,13 +396,13 @@ def shift_to_sugan_2(target_file, quene_id = 1):
             f.write("sbatch %s\n" % name)
 
 def shift_to_parra(target_file,chrg=0, uhf=0):
-    """将提交脚本和总提交脚本改成适用于并行云超算的格式。
+    """Convert submission script and master script to formats suitable for Parallel Cloud Supercomputer.
 
     Args:
-        target_file (_type_): Xtb文件的根目录
-        quene_id (int, optional): 曙光合肥中心的队列编号. Defaults to 1.
-        chrg (int, optional): 电荷. Defaults to 0.
-        uhf (int, optional): 单电子数. Defaults to 0.
+        target_file (_type_): Root directory of xtb files
+        quene_id (int, optional): Queue ID for Dawning Hefei Center. Defaults to 1.
+        chrg (int, optional): Charge. Defaults to 0.
+        uhf (int, optional): Number of unpaired electrons. Defaults to 0.
     """    
     pbs_files = glob.glob(target_file + '/*.pbs')
     for pbs_file in pbs_files:
@@ -415,7 +415,7 @@ def shift_to_parra(target_file,chrg=0, uhf=0):
             name = os.path.split(pbs_file)[-1]
             f.write("sbatch %s\n" % name)
 
-# 检查错误
+# Check errors
 
 # def find_min_eng_log(opt_str="xtb_result/id_000101*.log", limit=1, return_eng = False):
 #     pre_opt_files = glob.glob(opt_str)

@@ -12,8 +12,8 @@ from . import logfile_process, FormatConverter, xtb_process, mol_manipulation, T
 
 
 def get_react_atomid(smiles, type_='B'):
-    """根据常见的几类B、配体、氯确定反应位点
-    对于氯和配体，会获取不同化学环境的多个反应位点
+    """Determine the reaction site based on the common categories of B, ligand, and chlorine
+    For chlorine and ligand, multiple reaction sites with different chemical environments will be obtained.
 
     Args:
         smiles (str): SMILES
@@ -46,7 +46,7 @@ def get_react_atomid(smiles, type_='B'):
             nu_atom_idx = [each.GetIdx() for each in nu_mol.GetAtoms() if each.GetSymbol() == 'Cl']
         else:
             nu_atom_idx = [each.GetIdx() for each in nu_mol.GetAtoms() if each.GetSymbol() == 'N' and len(each.GetNeighbors()) > 1]
-        # 挑选出不同化学环境的配位原子，删除具有对称性的配位原子之一
+        # Select coordination atoms with different chemical environments and delete one of the coordination atoms with symmetry
         remain_smiles = []
         remain_atom_ids = []
         for each_idx in nu_atom_idx:
@@ -59,16 +59,16 @@ def get_react_atomid(smiles, type_='B'):
         return remain_atom_ids
 
 def generate_combinations(reactant_file, Bresult_file, Nresult_file, Clresult_file):
-    """根据给定的excel，获取反应物、反应位点、编号便于统计
+    """According to the given excel, obtain the reactant, reaction site, and number for easy statistics
 
     Args:
-        reactant_file (str): 原始Excel的路径
-        Bresult_file (str): 要存储B自由基信息的文件路径
-        Nresult_file (_type_): 要存储配体信息的文件路径
-        Clresult_file (_type_): 要存储氯化物信息的文件路径
+        reactant_file (str): Path to original Excel
+        Bresult_file (str): file path to store Bradical information
+        Nresult_file (_type_): file path to store ligand information
+        Clresult_file (_type_): file path to store chloride information
 
     Returns:
-        list: 含有多种反应位点的配体的编号
+        list: contains the ligand numbers of multiple reaction sites
     """    
     duplicate_N = []
     duplicate_Cl = []
@@ -146,11 +146,11 @@ def generate_combinations(reactant_file, Bresult_file, Nresult_file, Clresult_fi
     return duplicate_N, duplicate_Cl
 
 def B_N_Single_Xtb(root_file, Bresult_file, Nresult_file, mol_xtb_name = 'Mol_xtb', mol_name = "Mols"):
-    """产生B自由基、配体单体的Xtb优化文件
+    """Generate Xtb optimization files of Bradical and ligand units
 
     Args:
-        Bresult_file (str): 存储B自由基信息的文件路径
-        Nresult_file (str): 存储配体信息的文件路径
+        Bresult_file (str): file path to store Bradical information
+        Nresult_file (str): file path to store ligand information
     """    
     Bresult_file=pd.read_csv(Bresult_file)
     Nresult_file=pd.read_csv(Nresult_file)
@@ -196,14 +196,14 @@ def B_N_Single_Xtb(root_file, Bresult_file, Nresult_file, mol_xtb_name = 'Mol_xt
     xtb_process.shift_to_sugan(mol_xtb_file_, 1, 0, 0)
 
 def B_N_Cl_reactant_product_Xtb(root_file, Bresult_file, Nresult_file, Clresult_file, duplicate_N_id, duplicate_Cl_id, mol_xtb_name = 'Mol_xtb', mol_name = "Mols"):
-    """产生氯反应物和产物自由基的Xtb优化文件。
-    搭建B-N复合物，和Cl-B-N产物的Xtb优化文件
+    """Generate chlorinereactant and productradical Xtb optimized files.
+    Build B-Ncomplex and Xtb optimization files of Cl-B-Nproduct
 
     Args:
-        Bresult_file (str): 要存储B自由基信息的文件路径
-        Nresult_file (_type_): 要存储配体信息的文件路径
-        Clresult_file (_type_): 要存储氯化物信息的文件路径
-        duplicate_N_id (list): 含有多种反应位点的配体编号
+        Bresult_file (str): file path to store Bradical information
+        Nresult_file (_type_): file path to store ligand information
+        Clresult_file (_type_): file path to store chloride information
+        duplicate_N_id (list): Contains ligand numbers of multiple reaction sites
     """    
     mol_xtb_file = os.path.join(root_file, mol_xtb_name)
     old_mol_file = os.path.join(root_file, 'Mols')
@@ -355,16 +355,16 @@ def smiles_DFT_calc(root_dir='first_xtb',
                     rmsd_limit=1.5,
                     SpinMultiplicity = None
                     ):
-    """通过Xtb结果，优化得到Gaussian优化输入文件
+    """Through Xtb results, optimize the Gaussian optimization input file
 
     Args:
         root_dir (str, optional): Xtb的根目录. Defaults to 'first_xtb'.
-        mol_dir (str, optional): Mol分子的目录. Defaults to 'mol'.
-        dft_dir (str, optional): 要存储Gaussian输入文件的目录. Defaults to 'mol_dft'.
-        method (str, optional): Gaussian方法. Defaults to "opt freq b3lyp/6-31g* em=gd3bj".
-        conf_limit (int, optional): Xtb读取结构的构象数量限制. Defaults to 3.
-        rmsd_limit (float, optional): Xtb读取结构的RMSD限制. Defaults to 1.5.
-        SpinMultiplicity (int, optional): 设定的自旋多重度. Defaults to None.
+        mol_dir (str, optional): Directory of Mol molecules. Defaults to 'mol'.
+        dft_dir (str, optional): Directory to store Gaussian input files. Defaults to 'mol_dft'.
+        method (str, optional): Gaussian method. Defaults to "opt freq b3lyp/6-31g* em=gd3bj".
+        conf_limit (int, optional): Limit on the number of converters that Xtb can read from the structure. Defaults to 3.
+        rmsd_limit (float, optional): RMSD limit for Xtb read structures. Defaults to 1.5.
+        SpinMultiplicity (int, optional): 设定的spin multiplicity. Defaults to None.
     """                    
     all_files = glob.glob(root_dir + "/*/*/*")
     for xtb_file in all_files:
@@ -549,7 +549,7 @@ def collection_dft_ts(ts_csv_path, dft_dir, spe_dir, duplicate_Cl_id = [624, 625
     result_file[f"bond_2"] = bond_2
     result_file.to_csv(ts_csv_path, index=False)
 
-# 复合物整理
+# complex finishing
 def collection_dft_couple(
     mol_dir, dft_dir, spe_dir,duplicate_N_id,
     Bresult_path = 'Data/All_Data/reactants_B.csv',
@@ -652,7 +652,7 @@ def reaction_calc_ts(target_dir, method, om_name="OM", ts_name="TS"):
             continue     
 
 def reaction_calc_irc(target_dir, ts_name='ts', irc_name='irc', freq_limit = -100, require_all = False):
-    # 仅针对频率较低或者振动方向错误的
+    # Only for low frequency or wrong vibration direction
     ts_file_dir = target_dir + "/" + ts_name
     irc_dir = target_dir + "/" + irc_name
     if not os.path.isdir(irc_dir):
@@ -794,19 +794,19 @@ def calc_distribution_line_split(y, eachsize=0.1, title=None, xlab=None, ylab=No
 # Model 
 def normalize_axis(arr, axis=0, mean=[], std=[]):
     """
-    对数组中的某一维进行标准化（z-score normalization）
+    Normalize a certain dimension in the array (z-score normalization)
     
-    参数：
-    arr: ndarray，输入的数组
-    axis: int，标准化的维度
+    parameter:
+    arr: ndarray, input array
+    axis: int, normalized dimension
     
-    返回值：
-    normalized_arr: ndarray，标准化后的数组
+    Return value:
+    normalized_arr: ndarray, normalized array
     """
     if len(mean) == 0 or len(mean) == 0:
-        mean = np.mean(arr, axis=axis, keepdims=True)  # 计算均值
-        std = np.std(arr, axis=axis, keepdims=True)  # 计算标准差
-    normalized_arr = (arr - mean) / std  # 标准化
+        mean = np.mean(arr, axis=axis, keepdims=True)  # Calculate mean
+        std = np.std(arr, axis=axis, keepdims=True)  # Calculate standard deviation
+    normalized_arr = (arr - mean) / std  # standardization
     normalized_arr = np.nan_to_num(normalized_arr, 0)
     return normalized_arr, mean, std
 
@@ -842,24 +842,24 @@ def draw_heatmap(x_labels, y_labels, values, title="None", figure_size=(40, 6), 
     # model_labels = ["GB", "XGB", "RF", "ET", "AdaB", "Line", "MLP"]
     # model_labels = ["no_product", "with_product", "with_structure"]
 
-    plt.rcParams['font.sans-serif']='Arial'#设置中文显示，必须放在sns.set之后
+    plt.rcParams['font.sans-serif']='Arial'#Set Chinese display, must be placed after sns.set
 
-    uniform_data = values #设置二维矩阵
+    uniform_data = values #Set up a 2D matrix
     f, ax = plt.subplots(figsize=figure_size)
     annot_kws = {"fontsize": 30}
-    #heatmap后第一个参数是显示值,vmin和vmax可设置右侧刻度条的范围,
-    #参数annot=True表示在对应模块中注释值
-    # 参数linewidths是控制网格间间隔
-    #参数cbar是否显示右侧颜色条，默认显示，设置为None时不显示
-    #参数cmap可调控热图颜色，具体颜色种类参考：https://blog.csdn.net/ztf312/article/details/102474190
+    #The first parameter after heatmap is the display value. vmin and vmax can set the range of the scale bar on the right.
+    #The parameter annot=True means annotating the value in the corresponding module
+    # The parameter linewidths controls the spacing between grids.
+    #Parameter cbar indicates whether to display the right color bar. It is displayed by default and will not be displayed when set to None.
+    #The parameter cmap can control the color of the heat map. For specific color types, please refer to: https://blog.csdn.net/ztf312/article/details/102474190
     sns.heatmap(uniform_data, ax=ax,vmin=min_value,vmax=max_value,cmap='Blues',linewidths=2,cbar=True, annot=True,annot_kws=annot_kws, fmt='.3f')
 
-    ax.set_title(title, fontsize=40) #plt.title('热图'),均可设置图片标题
-    # ax.set_ylabel('descriptor', fontsize=10)  #设置纵轴标签
-    # ax.set_xlabel('model', fontsize=10)  #设置横轴标签
+    ax.set_title(title, fontsize=40) #plt.title('heat map'), you can set the picture title
+    # ax.set_ylabel('descriptor', fontsize=10) #Set the vertical axis label
+    # ax.set_xlabel('model', fontsize=10) #Set the horizontal axis label
     ax.set_xticklabels(x_labels, fontsize=30)
     ax.set_yticklabels(y_labels, fontsize=30)
-    # #设置坐标字体方向，通过rotation参数可以调节旋转角度
+    # #Set the coordinates font direction, and the rotation angle can be adjusted through the rotation parameter
     label_y =  ax.get_yticklabels()
     plt.setp(label_y, rotation=0, horizontalalignment='right')
     label_x =  ax.get_xticklabels()
@@ -870,7 +870,7 @@ def draw_heatmap(x_labels, y_labels, values, title="None", figure_size=(40, 6), 
 
 VAN_DER_WAALS_RADII = {"H": 1.20, "C":1.77, "N": 1.55, "O": 1.50, "F": 1.46, "S": 1.89, "Cl": 1.82, "Si":2.10, "P":1.80}
 def Calc_cylinder_bv(symbol_lists, geom, Base_id, Cl_id, radius):
-    # 非均匀格点积分
+    # non-uniform grid point integral
     next_atom = [each for each in range(len(symbol_lists)) if each not in [Base_id, Cl_id]][0]
     distance = np.linalg.norm(geom[Cl_id] - geom[Base_id])
     new_geom_position = mol_manipulation.trfm_rot(geom[Base_id], geom[Cl_id], geom[next_atom], geom, np.array([-distance/2,0,0]))
@@ -881,7 +881,7 @@ def Calc_cylinder_bv(symbol_lists, geom, Base_id, Cl_id, radius):
     total_points = num * num * num 
     counts = np.zeros(8, dtype=np.int32)
 
-    # 生成均匀的网格点
+    # Generate uniform grid points
     x = np.linspace(0.1 -radius, radius - 0.1, num)
     y = x; z = np.linspace(0.1 -distance, distance - 0.1, num)
     points = np.array(np.meshgrid(x, y, z)).T.reshape(-1, 3)
@@ -900,22 +900,22 @@ def Calc_cylinder_bv(symbol_lists, geom, Base_id, Cl_id, radius):
 
 def shortest_distance(coords):
     """
-    计算给定分子中任意两个原子之间的最短距离。
+    Calculate the shortest distance between any two atoms in a given molecule.
 
-    参数：
-    coords: N×3 的 numpy 数组，表示所有原子的坐标。
+    parameter:
+    coords: N×3 numpy array, representing the coordinates of all atoms.
 
-    返回值：
-    分子中任意两个原子之间的最短距离。
+    Return value:
+    The shortest distance between any two atoms in the molecule.
     """
-    # 计算原子间距离矩阵
+    # Calculate distance matrix between atoms
     diff = coords[:, np.newaxis, :] - coords[np.newaxis, :, :]
     dist_mat = np.linalg.norm(diff, axis=-1)
 
-    # 忽略对角线元素并取上三角部分
+    # Ignore the diagonal elements and take the upper triangular part
     upper_dist_mat = np.triu(dist_mat, k=1)
 
-    # 找到最小的非零距离值作为最短距离
+    # Find the smallest non-zero distance value as the shortest distance
     min_dist = np.amin(upper_dist_mat[upper_dist_mat > 0])
 
     return min_dist

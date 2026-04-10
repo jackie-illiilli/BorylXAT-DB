@@ -57,11 +57,11 @@ for line_id, line in tqdm(B_N_csv.iterrows()):
     if B_N_name in B_N_des_map:
         continue
 
-    # 从 smiles 获取 B 单体原子数，用于计算 N 在复合物中的原子偏移
+    # Get B monomer atom count from SMILES, used to calculate N atom offset in complex
     B_mol = B_N_Cl.mol_manipulation.smiles2mol(B_smiles)
     B_atomnum = B_mol.GetNumAtoms()
 
-    # 从 db 读取 complex_r 和 complex_p 记录
+    # Read complex_r and complex_p records from db
     react_key = f"B_{B_Index:05}_LB_{N_Index:05}_r"
     prod_key = f"B_{B_Index:05}_LB_{N_Index:05}_p"
     react_row = db.get(key=react_key)
@@ -78,14 +78,14 @@ for line_id, line in tqdm(B_N_csv.iterrows()):
     react_hirshfeld = react_row.data.get("hirshfeld_charges")
     prod_hirshfeld = prod_row.data.get("hirshfeld_charges")
 
-    # BN react 描述符
+    # BN react descriptors
     descriptor = [react_eng]
     descriptor += [react_spin_densities[B_Atomid]]
     descriptor += [react_hirshfeld[B_Atomid]]
     descriptor += [B_N_Cl.Tool.get_atoms_distance(react_positions[B_Atomid], react_positions[N_Atomid + B_atomnum - 1])]
     descriptor += [react_row.homo_energy_kcal]
 
-    # BNCl product 描述符
+    # BNCl product descriptors
     Cl_Index = prod_symbols.index("Cl")
     descriptor += [prod_hirshfeld[B_Atomid], prod_hirshfeld[Cl_Index]]
     descriptor += [B_N_Cl.Tool.get_atoms_distance(prod_positions[B_Atomid], prod_positions[Cl_Index])]
@@ -105,11 +105,11 @@ for line_id, line in tqdm(Cl_csv.iterrows()):
     Cl_smiles = line['Smiles']
     react_eng = line['deltaG_react']
 
-    # 从 smiles 获取 C 原子索引（Cl 的邻居）
+    # Get C atom index from SMILES (neighbor of Cl)
     Cl_mol = B_N_Cl.mol_manipulation.smiles2mol(Cl_smiles)
     C_atom_idx = Cl_mol.GetAtomWithIdx(Cl_Atomid).GetNeighbors()[0].GetIdx()
 
-    # 从 db 读取 Cl_r 和 c_radical (Cl_p) 记录
+    # Read Cl_r and c_radical (Cl_p) records from db
     react_key = f"Cl_{Cl_Index:05}_r"
     prod_key = f"Cl_{Cl_Index:05}_p"
     react_row = db.get(key=react_key)
@@ -125,7 +125,7 @@ for line_id, line in tqdm(Cl_csv.iterrows()):
     prod_spin_densities = prod_row.data.get("spin_densities")
     prod_hirshfeld = prod_row.data.get("hirshfeld_charges")
 
-    # C-Cl react 描述符
+    # C-Cl react descriptors
     descriptor = [react_eng]
     descriptor += [react_hirshfeld[Cl_Atomid], react_hirshfeld[C_atom_idx]]
 
@@ -135,7 +135,7 @@ for line_id, line in tqdm(Cl_csv.iterrows()):
     bv.octant_analysis()
     descriptor += [np.sum(list(bv.octants['percent_buried_volume'].values()))]
 
-    # Cl product (C radical) 描述符
+    # Cl product (C radical) descriptors
     if C_atom_idx > Cl_Atomid: C_atom_idx -= 1
     descriptor += [prod_spin_densities[C_atom_idx]]
     descriptor += [prod_hirshfeld[C_atom_idx]]

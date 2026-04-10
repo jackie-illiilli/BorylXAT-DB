@@ -1,4 +1,4 @@
-# 一些文件转换的脚本写在这里
+# Some file conversion scripts are written here
 import numpy as np
 import pandas as pd
 import shutil, os
@@ -8,7 +8,7 @@ from rdkit.Chem import AllChem
 
 from . import Tool
 # def MolFormatConversion(input_file: str, output_file: str, input_format="xyz", output_format="sdf"):
-#     """简单的完成xyz和sdf转换，
+#     """Simple completion of xyz and sdf conversion,
 
 #     Args:
 #         input_file (str): file dir
@@ -80,7 +80,7 @@ def xyz_to_gjf(choose="opt"):
             af.write("\n\n")
 
 def mol_to_xyz(mol, atom_list=None, position_list=None, file_dir="test.xyz",title=None):
-    """最基础的mol转化为xyz文件的过程
+    """The most basic process of converting mol to xyz file
 
     Args:
         mol (Chem.Mol): 
@@ -115,28 +115,28 @@ def mol_to_xyz(mol, atom_list=None, position_list=None, file_dir="test.xyz",titl
 
 def write_xyz_file(filename, molecules):
     """
-    将多个分子的原子列表和位置写入一个 XYZ 文件。
+    Writes the atom lists and positions of multiple molecules to an XYZ file.
 
-    :param filename: 输出的 XYZ 文件名
-    :param molecules: 包含多个分子的列表，每个分子是一个字典，格式如下：
+    :param filename: output XYZ file name
+    :param molecules: A list containing multiple molecules, each molecule is a dictionary, in the following format:
                       {
-                          'name': '分子名称',
-                          'atomlist': ['H', 'O', 'C'],  # 原子类型列表
-                          'positions': [[0.0, 0.0, 0.0], [0.0, 0.0, 1.0], [1.0, 1.0, 1.0]]  # 原子坐标列表
+                          'name': 'molecule name',
+                          'atomlist': ['H', 'O', 'C'], # atom type list
+                          'positions': [[0.0, 0.0, 0.0], [0.0, 0.0, 1.0], [1.0, 1.0, 1.0]] # atomcoordinates list
                       }
     """
     with open(filename, 'w') as f:
-        # 写入每个分子的原子信息
+        # Write atom information for each molecule
         for molecule in molecules:
             atomlist = molecule['atomlist']
             positions = molecule['positions']
             num_atoms = len(atomlist)
 
-            # 写入分子的标题行
+            # Write the title row of the molecule
             f.write(f"{num_atoms}\n")
             f.write(f"{molecule['name']}\n")
 
-            # 写入原子信息
+            # Write atom information
             for atom, position in zip(atomlist, positions):
                 f.write(f"{atom} {' '.join(map(str, position))}\n")
 
@@ -200,7 +200,7 @@ def block_to_gjf(symbol_list, positions, file="test_data/mol2gjf.gjf", charge=0,
         method (str, optional): _description_. Defaults to "opt freq b3lyp/6-311g(d,p)".
         method2 (_type_, optional): _description_. Defaults to None.
         freeze (_type_, optional): Freeze atoms, as TS calculation. Defaults to [].
-        savechk (str, optional): Name of Chkfile, 省略.chk. Defaults to None.
+        savechk (str, optional): Name of Chkfile, omit .chk. Defaults to None.
     """    
     file_dir, filename = os.path.split(file)
     if not os.path.isdir(file_dir):
