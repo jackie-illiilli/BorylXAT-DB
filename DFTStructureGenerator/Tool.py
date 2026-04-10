@@ -4,6 +4,7 @@ import math, os, shutil
 import numpy as np
 import pandas as pd
 from rdkit import Chem
+from rdkit.Chem import rdMolTransforms
 
 
 def find_first_line(fileline, find_str, find_type="start"):
@@ -83,7 +84,7 @@ def get_bond_angle(atom_positionA, atom_positionB, atom_positionC):
     all_positions = [atom_positionA, atom_positionB, atom_positionC]
     for i in range(3):
         conf.SetAtomPosition(i, all_positions[i][:3])
-    bond_angle = Chem.rdMolTransforms.GetAngleDeg(conf, 0, 1, 2)
+    bond_angle = rdMolTransforms.GetAngleDeg(conf, 0, 1, 2)
     return bond_angle
 
 def get_torsion(A, B, C, D):
