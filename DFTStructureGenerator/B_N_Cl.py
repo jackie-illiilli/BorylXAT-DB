@@ -5,6 +5,7 @@ from rdkit.Geometry import Point3D
 import numpy as np
 from tqdm import tqdm
 import pandas as pd
+from scipy.interpolate import make_interp_spline
 from matplotlib import pyplot as plt
 from . import logfile_process, FormatConverter, xtb_process, mol_manipulation, Tool
 
@@ -677,26 +678,21 @@ def reaction_calc_irc(target_dir, ts_name='ts', irc_name='irc', freq_limit = -10
                 print("%s May have wrong vibration direction!!! " % ts_log.file_dir)
         mol_manipulation.ts_to_irc(ts_log, new_dir=irc_dir)
 
-def calc_distribution2(y, eachsize=0.01, title=None, xlab=None, ylab="Count", y_max=None, y_min=None, figure_size = (4,3)):
+def calc_distribution(y, eachsize=0.01, title=None, xlab=None, ylab=None, y_max=None, y_min=None, figure_size = (4,3), savename='test'):
     if y_max == None:    y_max = np.max(y)
     if y_min == None:    y_min = np.min(y)
     X = np.arange(y_min, y_max + eachsize, eachsize)
-    des = [0 for each in X]
-    z = (y - y_min)/eachsize
-    for each in z:
-        try:
-            des[int(each)] += 1
-        except:
-            continue
-    des = np.array(des)
-    # des = des / len(y)
+    x_hist, x_bin_edges = np.histogram(y, bins=X)
+    # x_hist = x_hist / len(y)
+    x_bin_centers = 0.5 * (x_bin_edges[:-1] + x_bin_edges[1:])
+    # spl_x = make_interp_spline(x_bin_centers, x_hist, k=3)
     
     fig = plt.figure(figsize=figure_size)
     ax = fig.add_subplot(111)
     ax.patch.set_alpha(0.0)
-    plt.bar(X, des, width=eachsize/2, color="green")
+    plt.bar(x_bin_centers, x_hist, width=eachsize/2, color="green")
     plt.xlim(y_min - eachsize, y_max + eachsize)
-    plt.ylim(0, np.max(des) * 1.2)
+    plt.ylim(0, np.max(x_hist) * 1.2)
     plt.xlabel(xlab, fontsize=30)
     plt.ylabel(ylab, fontsize=30)
     plt.xticks(fontsize=15)
@@ -704,9 +700,95 @@ def calc_distribution2(y, eachsize=0.01, title=None, xlab=None, ylab="Count", y_
     if title != None:
         plt.title = title
     plt.tight_layout()
-    plt.savefig('test.svg', format='svg')
+    plt.savefig(f'{savename}.png', format='png', dpi=300)
     plt.show()
-    return des 
+    return x_hist 
+
+def calc_distribution_line(ys, eachsize=0.1, title=None, xlab=None, ylab=None, return_result = False, labels = None, colors = None, useSVG=False, save_name='test', figure_size=(5,4), xlimit = [], xticks=[]):
+    fig = plt.figure(figsize=figure_size)
+    y_max = np.max([np.max(each) for each in ys])
+    y_min = np.min([np.min(each) for each in ys])
+    # y_max = 50
+    # y_min = 0
+    if labels == None:
+        labels = [None] * len(ys)
+    if colors == None:
+        colors = ["blue"] * len(ys)
+    X = np.arange(y_min, y_max + eachsize, eachsize)
+    all_max = []
+    for idx, y in enumerate(ys):
+        x_hist, x_bin_edges = np.histogram(y, bins=X, density=True)
+        x_bin_centers = 0.5 * (x_bin_edges[:-1] + x_bin_edges[1:])
+        model = make_interp_spline(x_bin_centers, x_hist)
+        ys = model(x_bin_centers)
+        all_max.append(max(ys))
+        # print(x_bin_centers[np.argmax(ys)])
+
+        plt.plot(x_bin_centers, ys, color=colors[idx])
+        plt.fill_between(x_bin_centers, ys, 0, where=(ys > 0), interpolate=True, color=colors[idx], alpha=0.3, label=labels[idx])
+    if xlimit != []:
+        plt.xlim(xlimit[0], xlimit[1])
+    else:
+        plt.xlim(y_min - eachsize, y_max + eachsize)
+    plt.ylim(0, 1.1 * max(all_max))
+    plt.xlabel(xlab, fontsize=30)
+    plt.ylabel(ylab, fontsize=30)
+    if len(xticks):
+        plt.xticks(xticks, fontsize=30)
+    else:
+        plt.xticks(fontsize=30)
+    plt.yticks(fontsize=30)
+    if labels[0] != None:
+        plt.legend()
+    if title != None:
+        plt.title = title
+    if useSVG:
+        plt.savefig(f"{save_name}.svg", bbox_inches='tight', format='svg')
+    else:
+        plt.savefig(f"{save_name}.png", dpi=300, bbox_inches='tight')
+    # plt.show()  
+    if return_result:
+        return des
+
+
+def calc_distribution_line_split(y, eachsize=0.1, title=None, xlab=None, ylab=None, return_result = False, labels = None, colors = None, useSVG=False, save_name='test', figure_size=(5,4), xlimit = [], split=-4.1):
+    fig = plt.figure(figsize=figure_size)
+    y_max = np.max(y)
+    y_min = np.min(y)
+    if colors == None:
+        colors = ["green", 'orange']
+    X = np.arange(y_min, y_max + eachsize, eachsize)
+    all_max = []
+    x_hist, x_bin_edges = np.histogram(y, bins=X, density=True)
+    # x_bin_centers = 0.5 * (x_bin_edges[:-1] + x_bin_edges[1:])
+    x_bin_centers = x_bin_edges[:-1]
+    model = make_interp_spline(x_bin_centers, x_hist)
+    x_bin_centers_new = np.arange(y_min, y_max + eachsize, 0.1)
+    ys = model(x_bin_centers_new)
+    all_max.append(max(ys))
+    print(x_bin_centers_new[np.argmax(ys)])
+    min_split_ids = np.where(x_bin_centers_new <= split)[0]
+    plt.plot(x_bin_centers_new[min_split_ids], ys[min_split_ids], color=colors[0])
+    plt.fill_between(x_bin_centers_new[min_split_ids], ys[min_split_ids], 0, interpolate=True, color=colors[0], alpha=0.3)
+    max_split_ids = np.where(x_bin_centers_new >= split)[0]
+    plt.plot(x_bin_centers_new[max_split_ids], ys[max_split_ids], color=colors[1])
+    plt.fill_between(x_bin_centers_new[max_split_ids], ys[max_split_ids], 0, interpolate=True, color=colors[1], alpha=0.3)
+    if xlimit != []:
+        plt.xlim(xlimit[0], xlimit[1])
+    else:
+        plt.xlim(y_min - eachsize, y_max + eachsize)
+    plt.ylim(0, 1.1 * max(all_max))
+    plt.xlabel(xlab, fontsize=30)
+    plt.ylabel(ylab, fontsize=30)
+    plt.xticks(fontsize=30)
+    plt.yticks(fontsize=30)
+    if useSVG:
+        plt.savefig(f"{save_name}.svg", bbox_inches='tight', format='svg')
+    else:
+        plt.savefig(f"{save_name}.png", dpi=300, bbox_inches='tight')
+    # plt.show()  
+    if return_result:
+        return des
 
 
 # Model 
@@ -838,7 +920,27 @@ def shortest_distance(coords):
 
     return min_dist
 
-
+def generate_ts_mol(B_smiles, N_smiles, b_atom_idx, nu_atom_idx):
+    B_mol = mol_manipulation.smiles2mol(B_smiles)
+    N_mol = mol_manipulation.smiles2mol(N_smiles)
+    Chem.Kekulize(B_mol, clearAromaticFlags=True)
+    Chem.Kekulize(N_mol, clearAromaticFlags=True)
+    b_nu_mol = Chem.CombineMols(B_mol, N_mol)
+    H_atom_idx = [each.GetIdx() for each in B_mol.GetAtomWithIdx(int(b_atom_idx)).GetNeighbors() if each.GetSymbol() == 'H'][0]
+    b_nu_mol.GetAtomWithIdx(H_atom_idx).SetAtomicNum(17)
+    b_nu_mol.GetAtomWithIdx(int(b_atom_idx)).SetFormalCharge(-1)
+    chg = b_nu_mol.GetAtomWithIdx(int(nu_atom_idx + B_mol.GetNumAtoms())).GetFormalCharge()
+    b_nu_mol.GetAtomWithIdx(int(nu_atom_idx + B_mol.GetNumAtoms())).SetFormalCharge(chg + 1)
+    rwmol = Chem.RWMol(b_nu_mol)
+    rwmol.AddBond(int(b_atom_idx), int(nu_atom_idx + B_mol.GetNumAtoms()), Chem.BondType.SINGLE)
+    b_nu_product_mol = rwmol.GetMol()
+    rwmol = Chem.RWMol(b_nu_product_mol)
+    rwmol.GetAtomWithIdx(int(b_atom_idx)).SetNumRadicalElectrons(1)
+    rwmol.RemoveAtom(H_atom_idx)
+    b_nu_mol = rwmol.GetMol()
+    # Chem.SanitizeMol(b_nu_mol)
+    # Chem.SanitizeMol(b_nu_product_mol)
+    return b_nu_mol, b_nu_product_mol
 
 def generate_ts_structure(row, model1, model2, B_N_des_map=None, Cl_des_map=None, 
 reactant_dir=None,
@@ -894,19 +996,7 @@ pre_position = [],
     # if distance_C_Cl > 2.2: distance_C_Cl = 2.2
     # if distance_C_Cl < 2.0: distance_C_Cl = 2.0
     # Generate B_N product 
-    B_mol = mol_manipulation.smiles2mol(B_smiles)
-    N_mol = mol_manipulation.smiles2mol(N_smiles)
-    Chem.Kekulize(B_mol, clearAromaticFlags=True)
-    Chem.Kekulize(N_mol, clearAromaticFlags=True)
-    b_nu_mol = Chem.CombineMols(B_mol, N_mol)
-    H_atom_idx = [each.GetIdx() for each in B_mol.GetAtomWithIdx(int(b_atom_idx)).GetNeighbors() if each.GetSymbol() == 'H'][0]
-    b_nu_mol.GetAtomWithIdx(H_atom_idx).SetAtomicNum(17)
-    b_nu_mol.GetAtomWithIdx(int(b_atom_idx)).SetFormalCharge(-1)
-    chg = b_nu_mol.GetAtomWithIdx(int(nu_atom_idx + B_mol.GetNumAtoms())).GetFormalCharge()
-    b_nu_mol.GetAtomWithIdx(int(nu_atom_idx + B_mol.GetNumAtoms())).SetFormalCharge(chg + 1)
-    rwmol = Chem.RWMol(b_nu_mol)
-    rwmol.AddBond(int(b_atom_idx), int(nu_atom_idx + B_mol.GetNumAtoms()), Chem.BondType.SINGLE)
-    b_nu_product_mol = rwmol.GetMol()
+    b_nu_mol, b_nu_product_mol = generate_ts_mol(B_smiles, N_smiles, b_atom_idx, nu_atom_idx)
     if nu_mol_idx in duplicate_N_id:
         # b_nu_product_mol = Chem.MolFromMolFile(os.path.join(mol_dir, f"B_{b_mol_idx:05}_Nu_{nu_mol_idx:05}_Naid_{nu_atom_idx:05}_p.mol"), removeHs=False, sanitize=False)
         b_nu_product_logs = glob.glob(os.path.join(B_N_p_d_file, f"B_{b_mol_idx:05}_Nu_{nu_mol_idx:05}_Naid_{nu_atom_idx:05}_p_{bn_conf_idx:04}.log"))
