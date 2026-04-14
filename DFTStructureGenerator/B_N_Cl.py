@@ -1169,3 +1169,315 @@ pre_position = [],
 #         if not pass_a or not pass_b:
 #             new_file = os.path.join(irc_fail_dir, os.path.split(log_file)[-1])
 #             shutil.move(log_file, new_file)
+
+
+
+def _swap_path_segment(path, old_segment, new_segment):
+    normalized = path.replace("\\", "/")
+    replaced = normalized.replace(f"/{old_segment}/", f"/{new_segment}/")
+    return replaced.replace("/", os.sep)
+
+
+def _resolve_ts_energy_log(log_file, ts_name="TS", ts_energy_name="TS_ENG"):
+    candidates = [
+        _swap_path_segment(log_file, "TS_no_ENG", ts_energy_name),
+        _swap_path_segment(log_file, ts_name, ts_energy_name),
+    ]
+    for candidate in candidates:
+        if os.path.exists(candidate):
+            return candidate
+    return candidates[-1]
+
+
+def _irc_log_paths(ts_log_file, ts_name="TS_needIRC", irc_name="IRC_full"):
+    base = _swap_path_segment(ts_log_file, ts_name, irc_name)
+    stem, _ = os.path.splitext(base)
+    return {
+        "reverse": f"{stem}reverse.log",
+        "forward": f"{stem}forward.log",
+    }
+
+
+def _get_terminal_bond_distances(log):
+    title = [each - 1 for each in log.title]
+    distance_1 = Tool.get_atoms_distance(
+        log.running_positions[-1][title[0]],
+        log.running_positions[-1][title[1]],
+    )
+    distance_2 = Tool.get_atoms_distance(
+        log.running_positions[-1][title[1]],
+        log.running_positions[-1][title[2]],
+    )
+    return distance_1, distance_2
+
+
+def _move_with_directory(source, destination):
+    os.makedirs(os.path.dirname(destination), exist_ok=True)
+    shutil.move(source, destination)
+
+
+def prepare_irc_jobs(
+    avaliable_ts_files,
+    target_dir,
+    ts_glob_template,
+    ts_name="TS",
+    ts_need_irc_name="TS_needIRC",
+    ts_energy_name="TS_ENG",
+    require_all=True,
+):
+    need_irc_files = []
+    for b_id, n_id, cl_id in tqdm(avaliable_ts_files):
+        ts_opt_files = glob.glob(
+            ts_glob_template.format(B_id=b_id, N_id=n_id, Cl_id=cl_id)
+        )
+        if len(ts_opt_files) == 0:
+            continue
+        all_engs = []
+        for each in ts_opt_files:
+            log = logfile_process.Logfile(each)
+            g_correction = log.all_engs[-1]
+            ts_eng_file = _resolve_ts_energy_log(each, ts_name=ts_name, ts_energy_name=ts_energy_name)
+            if os.path.exists(ts_eng_file):
+                log = logfile_process.Logfile(ts_eng_file)
+                spe_eng = log.all_engs[-1]
+                all_engs.append(g_correction + spe_eng)
+        if len(all_engs) == len(ts_opt_files):
+            min_eng_id = np.argmin(np.array(all_engs))
+            need_irc_files.append(ts_opt_files[min_eng_id])
+        else:
+            need_irc_files.extend(ts_opt_files)
+
+    moved_files = []
+    for each_file in tqdm(need_irc_files):
+        new_file = _swap_path_segment(each_file, ts_name, ts_need_irc_name)
+        _move_with_directory(each_file, new_file)
+        moved_files.append(new_file)
+
+    reaction_calc_irc(
+        target_dir=target_dir,
+        ts_name=ts_need_irc_name,
+        irc_name='IRC_full',
+        require_all=require_all,
+    )
+    return moved_files
+
+
+def move_failed_irc_logs(
+    target_dir,
+    ts_name="TS_needIRC",
+    irc_name="IRC_full",
+    fail_dir_name="TS_fail_IRC",
+    distance_1_max=2.2,
+    distance_2_max=2.1,
+):
+    ts_dir = os.path.join(target_dir, ts_name)
+    fail_dir = os.path.join(target_dir, fail_dir_name)
+    os.makedirs(fail_dir, exist_ok=True)
+
+    moved_logs = []
+    min_eng_logs = glob.glob(os.path.join(ts_dir, "*.log"))
+    for each_log_file in min_eng_logs:
+        pass_dist_1 = 0
+        pass_dist_2 = 0
+        pass_reverse = 0
+        pass_forward = 0
+        irc_paths = _irc_log_paths(each_log_file, ts_name=ts_name, irc_name=irc_name)
+        for name, irc_file in irc_paths.items():
+            if not os.path.exists(irc_file):
+                pass_dist_1 = 0
+                pass_dist_2 = 0
+                pass_reverse = 0
+                pass_forward = 0
+                continue
+            log = logfile_process.Logfile(irc_file)
+            distance_1, distance_2 = _get_terminal_bond_distances(log)
+            if distance_1 < distance_1_max:
+                pass_dist_1 = 1
+            if distance_2 < distance_2_max:
+                pass_dist_2 = 1
+            if pass_dist_1 or pass_dist_2:
+                if name == 'reverse':
+                    pass_reverse = 1
+                else:
+                    pass_forward = 1
+        if not all([pass_dist_1, pass_dist_2, pass_reverse, pass_forward]):
+            new_ts_file = _swap_path_segment(each_log_file, ts_name, fail_dir_name)
+            _move_with_directory(each_log_file, new_ts_file)
+            moved_logs.append(new_ts_file)
+            for irc_file in irc_paths.values():
+                if os.path.exists(irc_file):
+                    new_irc_file = _swap_path_segment(irc_file, irc_name, fail_dir_name)
+                    _move_with_directory(irc_file, new_irc_file)
+    return moved_logs
+
+
+def move_uncertain_irc_logs(
+    target_dir,
+    ts_name="TS_needIRC",
+    irc_name="IRC_full",
+    uncertain_dir_name="TS_uncertain_IRC",
+    distance_1_bond_max=2.2,
+    distance_2_broken_min=2.5,
+    distance_1_broken_min=2.6,
+    distance_2_bond_max=2.1,
+):
+    ts_dir = os.path.join(target_dir, ts_name)
+    uncertain_dir = os.path.join(target_dir, uncertain_dir_name)
+    os.makedirs(uncertain_dir, exist_ok=True)
+
+    moved_logs = []
+    min_eng_logs = glob.glob(os.path.join(ts_dir, "*.log"))
+    for each_log_file in min_eng_logs:
+        pass_dist_1 = 0
+        pass_dist_2 = 0
+        irc_paths = _irc_log_paths(each_log_file, ts_name=ts_name, irc_name=irc_name)
+        for irc_file in irc_paths.values():
+            if not os.path.exists(irc_file):
+                pass_dist_1 = 1
+                pass_dist_2 = 1
+                continue
+            log = logfile_process.Logfile(irc_file)
+            distance_1, distance_2 = _get_terminal_bond_distances(log)
+            if distance_1 < distance_1_bond_max and distance_2 > distance_2_broken_min:
+                pass_dist_1 = 1
+            if distance_1 > distance_1_broken_min and distance_2 < distance_2_bond_max:
+                pass_dist_2 = 1
+        if not all([pass_dist_1, pass_dist_2]):
+            new_ts_file = _swap_path_segment(each_log_file, ts_name, uncertain_dir_name)
+            _move_with_directory(each_log_file, new_ts_file)
+            moved_logs.append(new_ts_file)
+            for irc_file in irc_paths.values():
+                if os.path.exists(irc_file):
+                    new_irc_file = _swap_path_segment(irc_file, irc_name, uncertain_dir_name)
+                    _move_with_directory(irc_file, new_irc_file)
+    return moved_logs
+
+
+def build_ts_summary_dataframe(
+    target_dir,
+    bn_energies_r,
+    cl_energies_r,
+    bn_energies_p,
+    cl_energies_p,
+    ts_name="TS_needIRC",
+    ts_eng_name="TS_ENG",
+):
+    rows = []
+    all_logs = glob.glob(os.path.join(target_dir, ts_name, "*.log"))
+    for log_file in all_logs:
+        names = os.path.basename(log_file).split('.')[0].split('_')
+        b_index, n_index, cl_index = [int(each) for each in names[1:6:2]]
+        conf_id = int(names[6]) if len(names) == 7 else -1
+        log = logfile_process.Logfile(log_file)
+        title = [each - 1 for each in log.title]
+        g_cor = log.all_engs[-1]
+        energy_file = _swap_path_segment(log_file, ts_name, ts_eng_name)
+        if not os.path.exists(energy_file):
+            continue
+        energy_log = logfile_process.Logfile(energy_file)
+        zpe = energy_log.all_engs[-1]
+        ts_g = zpe + g_cor
+        reactant_g = bn_energies_r[f'{b_index:05}_{n_index:05}'] + cl_energies_r[f'{cl_index:05}']
+        product_g = bn_energies_p[f'{b_index:05}_{n_index:05}'] + cl_energies_p[f'{cl_index:05}']
+        delta_g = (product_g - reactant_g) * 627.5
+        delta_ga = (ts_g - reactant_g) * 627.5
+        b_cl = Tool.get_atoms_distance(log.running_positions[-1][title[0]], log.running_positions[-1][title[1]])
+        c_cl = Tool.get_atoms_distance(log.running_positions[-1][title[1]], log.running_positions[-1][title[2]])
+        rows.append({
+            "B_Index": b_index,
+            "N_Index": n_index,
+            "Cl_Index": cl_index,
+            "Conf_id": conf_id,
+            "TS_G": ts_g,
+            "deltaG(kcal/mol)": delta_g,
+            "deltaGa(kcal/mol)": delta_ga,
+            "B_Cl": b_cl,
+            "C_Cl": c_cl,
+        })
+    return pd.DataFrame(rows)
+
+
+def export_ts_summary_csv(
+    target_dir,
+    bn_energies_r,
+    cl_energies_r,
+    bn_energies_p,
+    cl_energies_p,
+    output_csv,
+    ts_name="TS_needIRC",
+    ts_eng_name="TS_ENG",
+):
+    result_df = build_ts_summary_dataframe(
+        target_dir=target_dir,
+        bn_energies_r=bn_energies_r,
+        cl_energies_r=cl_energies_r,
+        bn_energies_p=bn_energies_p,
+        cl_energies_p=cl_energies_p,
+        ts_name=ts_name,
+        ts_eng_name=ts_eng_name,
+    )
+    result_df.to_csv(output_csv, index=False)
+    return result_df
+
+
+def build_reaction_aam_smiles(row):
+    b_index = int(row['B_Index'])
+    n_index = int(row['N_Index'])
+    cl_index = int(row['Cl_Index'])
+    b_atomid = int(row['B_Atomid'])
+    n_atomid = int(row['N_Atomid'])
+    cl_atomid = int(row['Cl_Atomid'])
+    b_smiles = row['B_smiles']
+    n_smiles = row['N_smiles']
+    cl_smiles = row['Cl_smiles']
+
+    b_mol = AllChem.AddHs(Chem.MolFromSmiles(b_smiles))
+    cl_atom = [each for each in b_mol.GetAtomWithIdx(b_atomid).GetNeighbors() if each.GetSymbol() == "H"][0]
+    cl_atom.SetAtomicNum(17)
+    Chem.Kekulize(b_mol)
+
+    n_mol = AllChem.AddHs(Chem.MolFromSmiles(n_smiles))
+    cl_mol = AllChem.AddHs(Chem.MolFromSmiles(cl_smiles))
+    Chem.Kekulize(n_mol)
+    Chem.Kekulize(cl_mol)
+    c_atom = [each for each in cl_mol.GetAtomWithIdx(cl_atomid).GetNeighbors() if each.GetSymbol() == "C"][0]
+    rwmol = Chem.RWMol(cl_mol)
+    rwmol.GetAtomWithIdx(c_atom.GetIdx()).SetNumRadicalElectrons(1)
+    rwmol.RemoveAtom(cl_atomid)
+    cl_mol = rwmol.GetMol()
+    cl_atomid = [each for each in b_mol.GetAtoms() if each.GetSymbol() == "Cl"][0].GetIdx()
+
+    b_atom_nums = b_mol.GetNumAtoms()
+    n_atom_nums = n_mol.GetNumAtoms()
+    comb_mol = Chem.CombineMols(b_mol, n_mol)
+    comb_mol = Chem.CombineMols(comb_mol, cl_mol)
+    for atom_id, each in enumerate(comb_mol.GetAtoms()):
+        each.SetAtomMapNum(atom_id + 1)
+
+    comb_mol = Chem.RWMol(comb_mol)
+    comb_mol.AddBond(b_atomid, n_atomid + b_atom_nums, Chem.BondType.SINGLE)
+    b_atom = comb_mol.GetAtomWithIdx(b_atomid)
+    b_atom.SetFormalCharge(b_atom.GetFormalCharge() - 1)
+    n_atom = comb_mol.GetAtomWithIdx(n_atomid + b_atom_nums)
+    n_atom.SetFormalCharge(n_atom.GetFormalCharge() + 1)
+    prod_mol = comb_mol.GetMol()
+    AllChem.SanitizeMol(prod_mol)
+
+    other_atom = [each for each in comb_mol.GetAtoms() if each.GetNumRadicalElectrons() == 1][0]
+    comb_mol.AddBond(cl_atomid, other_atom.GetIdx(), Chem.BondType.SINGLE)
+    comb_mol.RemoveBond(cl_atomid, b_atomid)
+    comb_mol.GetAtomWithIdx(b_atomid).SetNumRadicalElectrons(1)
+    other_atom.SetNumRadicalElectrons(0)
+    react_mol = comb_mol.GetMol()
+    AllChem.SanitizeMol(react_mol)
+
+    product_smiles = Chem.MolToSmiles(prod_mol)
+    react_smiles = Chem.MolToSmiles(react_mol)
+    return f"{react_smiles}>>{product_smiles}"
+
+
+def annotate_reaction_aam_csv(target_csv_path, output_csv_path):
+    target_csv = pd.read_csv(target_csv_path)
+    target_csv['AAM'] = [build_reaction_aam_smiles(row) for _, row in target_csv.iterrows()]
+    target_csv.to_csv(output_csv_path, index=False)
+    return target_csv
