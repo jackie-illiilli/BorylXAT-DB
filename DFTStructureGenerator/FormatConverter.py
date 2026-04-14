@@ -7,23 +7,7 @@ from rdkit import Chem
 from rdkit.Chem import AllChem
 
 from . import Tool
-# def MolFormatConversion(input_file: str, output_file: str, input_format="xyz", output_format="sdf"):
-#     """Simple completion of xyz and sdf conversion,
 
-#     Args:
-#         input_file (str): file dir
-#         output_file (str): file dir
-#         input_format (str, optional): _description_. Defaults to "xyz".
-#         output_format (str, optional): _description_. Defaults to "sdf".
-#     """    
-#     molecules = readfile(input_format, input_file)
-#     output_file_writer = Outputfile(output_format, output_file, overwrite=True)
-#     i = 0
-#     for molecule in molecules:
-#         output_file_writer.write(molecule)
-#         i += 1
-#     output_file_writer.close()
-#     print('%d molecules converted' % (i))
 
 def read_gjf(gjf_file, read_details=False):
     with open(gjf_file, "rt") as f:
@@ -54,31 +38,6 @@ def read_gjf(gjf_file, read_details=False):
     if read_details:
         return atoms, positions, method, charge, multi, title
     return atoms, positions
-
-# disabled by repo-wide static call scan: xyz_to_gjf
-# def xyz_to_gjf(choose="opt"):
-#     """write xyzfile to gjf
-#     Useless!!!
-#
-#     Args:
-#         choose (str, optional): _description_. Defaults to "opt".
-#     """    
-#     files = os.listdir("Data/xyz")
-#     for file in files:
-#         xyz_dir = "Data/xyz/" + file
-#         gjf_dir = "Data/gjf/" + file[:-4] + ".gjf"
-#         with open(gjf_dir, "wt") as af:
-#             if file in ["Tri-25.xyz", "Tri-26.xyz", "Tri-27.xyz"]:
-#                 af.write(
-#                     "%%nprocshared=28\n%mem=56GB\n#p opt freq b3lyp/6-31g(d)\n\nNone\n\n1 1\n")
-#             else:
-#                 af.write(
-#                     "%%nprocshared=28\n%mem=56GB\n#p opt freq b3lyp/6-31g(d)\n\nNone\n\n0 1\n")
-#             with open(xyz_dir, "rt") as bf:
-#                 a = bf.readlines()
-#                 for each in a[2:]:
-#                     af.write(each)
-#             af.write("\n\n")
 
 def mol_to_xyz(mol, atom_list=None, position_list=None, file_dir="test.xyz",title=None):
     """The most basic process of converting mol to xyz file
@@ -230,59 +189,6 @@ def block_to_gjf(symbol_list, positions, file="test_data/mol2gjf.gjf", charge=0,
             f.write("\n")
         f.write("\n\n")
 
-# disabled by repo-wide static call scan: _split_files
-# def _split_files(gjf_files, split_dir, split_num):
-#     for file_id, each_file in enumerate(gjf_files):
-#         target_dir = split_dir + str(file_id % split_num)
-#         if not os.path.isdir(target_dir):
-#             os.mkdir(target_dir)
-#         target_file = target_dir + "/" + os.path.split(each_file)[1]
-#         shutil.copy(each_file, target_file)
-#         # print(target_file)
-
-
-# disabled by repo-wide static call scan: conc_files
-# def conc_files(conc_dir, gjf_files):
-#     for file_id, each_file in enumerate(gjf_files):
-#         target_dir = conc_dir 
-#         if not os.path.isdir(target_dir):
-#             os.mkdir(target_dir)
-#         target_file = target_dir + "/" + os.path.split(each_file)[1]
-#         shutil.copy(each_file, target_file)
-
-# disabled by repo-wide static call scan: read_smiles_file
-# def read_smiles_file(files):
-#     all_smiles = []
-#     for file in files:
-#         with open(file, "r") as f:
-#             lines = f.readlines()
-#         for eachline in lines:
-#             smiles = eachline.strip("\n")
-#             all_smiles.append(smiles)
-#     return all_smiles
-    
-# disabled by repo-wide static call scan: write_smi_file
-# def write_smi_file(smiles_list, file_name):
-#     file_dir = os.path.split(file_name)[0]
-#     if not os.path.isdir(file_dir):
-#         os.mkdir(file_dir)
-#     with open(file_name, "wt") as f:
-#         for each in smiles_list:
-#             f.write(each)
-#             f.write('\n')
-            
-# disabled by repo-wide static call scan: write_smi_csv
-# def write_smi_csv(smiles_list, file_name):
-#     a = {"Index":{}, "Smiles":{}}
-#     for idx, smiles in enumerate(smiles_list):
-#         a["Index"][idx] = idx
-#         a["Smiles"][idx] = smiles
-#     file_dir = os.path.split(file_name)[0]
-#     if not os.path.isdir(file_dir):
-#         os.mkdir(file_dir)
-#     a = pd.DataFrame(a)
-#     a.to_csv(file_name)
-
 def read_chg_file(file):
     return_dict = {"index":{}, "symbol":{}, "charge":{}}
     with open(file) as f:
@@ -295,13 +201,4 @@ def read_chg_file(file):
         return_dict["charge"][idx] = float(line_list[-1])
     return pd.DataFrame(return_dict)
 
-# disabled by repo-wide static call scan: read_chg_from_sdf
-# def read_chg_from_sdf(file):
-#     return_dict = {"index":{}, "symbol":{}, "charge":{}}
-#     mol = Chem.SDMolSupplier(file, removeHs=False)[0]
-#     for atom in mol.GetAtoms():
-#         idx = atom.GetIdx()
-#         return_dict["index"][idx] = idx
-#         return_dict["symbol"][idx] = atom.GetSymbol()
-#         return_dict["charge"][idx] = atom.GetPropsAsDict()["molFileAlias"]
-#     return pd.DataFrame(return_dict)
+

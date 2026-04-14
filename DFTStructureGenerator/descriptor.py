@@ -27,45 +27,9 @@ DUPLICATE_CL_IDS = [
     710, 711, 713, 714, 716, 717, 718, 719, 720, 721, 722,
 ]
 
-MODELING_DESCRIPTOR_NAMES = [
-    "deltaG", "B_N Combination Energy", "B_N react deltaG", "B_N B_charge",
-    "B_N N_charge", "B_N B_spin", "B_N N_spin", "B_N B_Hirshfield_charge",
-    "B_N N_Hirshfield_charge", "B_N B_N_dist", "B_N Alpha-HOMO-1",
-    "B_N Alpha-HOMO", "B_N Alpha-LUMO", "B_N Alpha-LUMO+1",
-    "B_N Beta-HOMO-1", "B_N Beta-HOMO", "B_N Beta-LUMO",
-    "B_N Beta-LUMO+1", "B_N dipole", "B_N MaxOtherCharge",
-    "B_N MinOtherCharge", "B_N_Cl B_charge", "B_N_Cl N_charge",
-    "B_N_Cl Cl_charge", "B_N_Cl B_Hirshfield_charge",
-    "B_N_Cl N_Hirshfield_charge", "B_N_Cl Cl_Hirshfield_charge",
-    "B_N_Cl B_N_dist", "B_N_Cl N_Cl_dist", "B_N_Cl B_N_Cl_angel",
-    "B_N_Cl HOMO-1", "B_N_Cl HOMO", "B_N_Cl LUMO", "B_N_Cl LUMO+1",
-    "B_N_Cl dipole", "B_N_Cl MaxOtherCharge", "B_N_Cl MinOtherCharge",
-    "B_N_Cl MaxChargeDist", "B_N_Cl MinOtherChargeDist",
-    "B_N_Cl MaxOtherHCharge", "B_N_Cl MinOtherHCharge",
-    "B_N_Cl MaxHChargeDist", "B_N_Cl MinHOtherChargeDist",
-    "B_N_Cl MaxAromaticRingCharge", "B_N_Cl MinAromaticRingCharge",
-    "B_N_Cl MaxAromaticChargeDist", "B_N_Cl MinAromaticChargeDist",
-    "B_N_Cl Bv2radius", "B_N_Cl Bv4radius", "B_N_Cl Bv6radius",
-    "C_Cl react deltaG", "C_Cl Cl_charge", "C_Cl C_charge",
-    "C_Cl Cl_Hirshfield_charge", "C_Cl C_Hirshfield_charge",
-    "C_Cl MaxOtherCharge", "C_Cl MinOtherCharge",
-    "C_Cl MaxChargeDist", "C_Cl MinOtherChargeDist",
-    "C_Cl MaxOtherHCharge", "C_Cl MinOtherHCharge",
-    "C_Cl MaxHChargeDist", "C_Cl MinHOtherChargeDist",
-    "C_Cl MaxAromaticRingCharge", "C_Cl MinAromaticRingCharge",
-    "C_Cl MaxAromaticChargeDist", "C_Cl MinAromaticChargeDist",
-    "C_Cl C_Cl_dist", "C_Cl HOMO-1", "C_Cl HOMO", "C_Cl LUMO",
-    "C_Cl LUMO+1", "C_Cl dipole", "C_Cl Bv2radius", "C_Cl Bv4radius",
-    "C_Cl Bv6radius", "C C_charge", "C C_spin", "C C_Hirshfield_charge",
-    "C Alpha-HOMO-1", "C Alpha-HOMO", "C Alpha-LUMO",
-    "C Alpha-LUMO+1", "C Beta-HOMO-1", "C Beta-HOMO", "C Beta-LUMO",
-    "C Beta-LUMO+1", "C_dipole",
-]
-
 # Backward-compatible aliases for notebook variables.
 duplicate_N_id = DUPLICATE_N_IDS
 duplicate_Cl_id = DUPLICATE_CL_IDS
-all_des_name = MODELING_DESCRIPTOR_NAMES
 
 
 def _sum_buried_volume(symbols, positions, center_atom_id, axis_atom_id, radius=6):

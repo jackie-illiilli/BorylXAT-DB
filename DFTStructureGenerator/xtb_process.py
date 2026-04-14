@@ -149,54 +149,6 @@ def write_xtb_pbs(pbs_path, charge, que="gamma", root_dir='charg_0', uhf=0):
         f.write("    crest $folder.xyz -T 28 -gfn2 -chrg %d -uhf %d -rthr 0.25 -shake 1 --mdlen 0.5 > crest.out\n" % (charge, uhf))
         f.write("done")
 
-# disabled by repo-wide static call scan: xtb_main_2
-# def xtb_main_2(smiles_names, smileses, restrict = None, dir_path='xtb_process', que="gamma", charges = None, uhfs = None):
-#     """    !! Main Process
-#     Suitable for tasks with different charges and number of unpaired electrons
-#     Args:
-#         smiles_names: Identification filename for each SMILES
-#         smileses (_type_): smiles or mols
-#         dir_path (str, optional): root dir saved charge files. Defaults to 'xtb_process'.
-#         que (str, optional): Supercomputer queue. Defaults to "gamma".
-#         charges: Table of charges.
-#         uhfs: Table of unpaired electrons
-#     """    
-#
-#     if os.path.isdir(dir_path):
-#         # raise ValueError("Path has existed")
-#         pass
-#     else:
-#         os.mkdir(dir_path)
-#     now_id = 0
-#     with open(dir_path + "/suball", "wt", newline='\n') as f:
-#         for i, (smiles_name, smiles) in enumerate(zip(smiles_names, smileses)):
-#             if type(smiles) == str:
-#                 mol = mol_manipulation.smiles2mol(smiles)
-#                 if mol is None:
-#                     print(smiles)
-#             elif type(smiles) == Chem.Mol:
-#                 mol = smiles
-#
-#             if charges == None:
-#                 charge = 0
-#             else:
-#                 charge = charges[i]
-#             if uhfs == None:
-#                 uhf = 0
-#             else:
-#                 uhf = uhfs[i]
-#
-#             if restrict == None:
-#                 xtb_write_xyz(mol, xtb_dir=dir_path + "/" + "charg_%d_%d_%d/" % (charge, uhf, now_id), smiles_name=smiles_name, )
-#             else:
-#                 xtb_write_xyz(mol, xtb_dir=dir_path + "/" + "charg_%d_%d_%d/" % (charge, uhf, now_id), smiles_name=smiles_name, dist_rest=restrict[i])
-#             
-#             pbs_path = dir_path + "/" + "xtb_%d_%d_%d.pbs" % (charge, uhf, now_id)
-#             write_xtb_pbs(pbs_path, charge, que, root_dir="charg_%d_%d_%d/" % (charge, uhf, now_id), uhf=uhf)
-#             f.write("qsub %s\n" % "xtb_%d_%d_%d.pbs" % (charge, uhf, now_id))
-#
-#             now_id += 1
-
 def xtb_main(smiles_names, smileses, restrict = None, dir_path='xtb_process', que="gamma", core=1, uhf=0):
     """    !! Main Process
     Classify all molecules for SMILES by charge and submit to multiple nodes.
@@ -255,30 +207,6 @@ def xtb_main(smiles_names, smileses, restrict = None, dir_path='xtb_process', qu
                 write_xtb_pbs(pbs_path, eachcharge, que, root_dir="charg_%d_%d" % (eachcharge, 0), uhf=uhf)
                 f.write("qsub %s\n" % "xtb_%d_%d.pbs" % (eachcharge, 0))
 
-# disabled by repo-wide static call scan: check_xtb_normal
-# def check_xtb_normal(root_dir):
-#     """Check once whether all xtb file calculations in all subdirectories under the specified directory are successful
-#
-#     Args:
-#         root_dir (_type_): _description_
-#
-#     Returns:
-#         Bool: Whether all are successful
-#     """    
-#     error_code = 0
-#     wait_check_dir = glob.glob(root_dir + "/*/*")
-#     for each_file in wait_check_dir:
-#         with open(each_file + "/crest.out", "rt") as f:
-#             lines = f.readlines()
-#         if not lines[-1].startswith(" CREST terminated normally."):
-#             print(each_file.split('/')[-1], "not end normally")
-#             error_code = 1
-#     if not error_code:
-#         print("All End Normally!")
-#         return True
-#     else:
-#         return False
-
 def read_xyz(file_dir):
     """Extract all atomic coordinates from the .xyz file
     Args:
@@ -310,23 +238,7 @@ def read_xyz(file_dir):
         positions.append(position)
     return atom_list, positions
 
-# disabled by repo-wide static call scan: xtb_is_success
-# def xtb_is_success(xtb_dir):
-#     """Check whether a single xtb task is successful
-#
-#     Args:
-#         xtb_dir (_type_): 
-#
-#     Returns:
-#         Bool: Whether successful
-#     """    
-#     if os.path.isfile(xtb_dir + '/crest.out'):
-#         with open(xtb_dir + '/crest.out', "rt", encoding='UTF-8') as f:
-#             final_line = f.readlines()[-1]
-#         if final_line.startswith(" CREST terminated normally."):
-#             return True
-#     print(xtb_dir, "  unsuccessful!")
-#     return False
+
 
 def after_xtb(mol, xtb_dir="xtb_process", save_dir="xtb_result", conf_limit=3, rmsd_limit=1.5, xtb_title=None, method="opt freq b3lyp/6-31g* em=gd3bj g09def", SpinMultiplicity=None, charge=None):
     """Given a specified mol molecule, find the corresponding task under xtb_dir, and generate Gaussian input files according to the set threshold and quantity limit
@@ -378,26 +290,6 @@ def shift_to_sugan(target_file, quene_id = 1,chrg=0, uhf=0):
             name = os.path.split(pbs_file)[-1]
             f.write("sbatch %s\n" % name)
 
-# disabled by repo-wide static call scan: shift_to_sugan_2
-# def shift_to_sugan_2(target_file, quene_id = 1):
-#     """Convert submission script and master script to formats suitable for Dawning Supercomputer Hefei Center.
-#
-#     Args:
-#         target_file (_type_): Root directory of xtb files
-#         quene_id (int, optional): Queue ID for Dawning Hefei Center. Defaults to 1.
-#     """    
-#     pbs_files = glob.glob(target_file + '/*.pbs')
-#     for pbs_file in pbs_files:
-#         chrg = int(pbs_file.split("_")[-3])
-#         uhf = int(pbs_file.split("_")[-2])
-#         with open(pbs_file, "wt",  newline='\n') as f:
-#             number = int(pbs_file.split(".pbs")[0].split("_")[-1])
-#             f.write("#!/bin/bash\n#SBATCH -J g16\n#SBATCH -N 1\n#SBATCH --ntasks-per-node=32\n#SBATCH -p hfacnormal%.2d\n\nroot=`pwd`\nrootdir=charg_%d_%d_%d\nfolders=`ls $root/$rootdir/`\n" % (quene_id, chrg, uhf, number))
-#             f.write("for folder in $folders\ndo\n    cd $root/$rootdir/$folder\n    crest $folder.xyz -T 28 -gfn2 -chrg %d -uhf %d -rthr 0.25 -shake 1 --mdlen 0.5 > crest.out\ndone\n" % (chrg, uhf))
-#     with open(target_file + '/suball', "wt",  newline='\n') as f:
-#         for pbs_file in pbs_files:
-#             name = os.path.split(pbs_file)[-1]
-#             f.write("sbatch %s\n" % name)
 
 def shift_to_parra(target_file,chrg=0, uhf=0):
     """Convert submission script and master script to formats suitable for Parallel Cloud Supercomputer.
@@ -418,47 +310,5 @@ def shift_to_parra(target_file,chrg=0, uhf=0):
         for pbs_file in pbs_files:
             name = os.path.split(pbs_file)[-1]
             f.write("sbatch %s\n" % name)
-
-# Check errors
-
-# def find_min_eng_log(opt_str="xtb_result/id_000101*.log", limit=1, return_eng = False):
-#     pre_opt_files = glob.glob(opt_str)
-#     opt_files = []
-#     eng_files = []
-#     for opt_file in pre_opt_files:
-#         try:
-#             eng_file = opt_file.split(".log")[0] + "_eng.log"
-#             eng_file = os.path.split(eng_file)[0] + "_eng" + "/" + os.path.split(eng_file)[1]
-#             assert os.path.isfile(eng_file)
-#             eng_files.append(eng_file)
-#             opt_files.append(opt_file)
-#         except:
-#             pass
-#     result_index = find_min_eng_log_(eng_files, opt_files, limit, return_eng)
-#     return result_index
-
-# def find_min_eng_log_(eng_files, opt_files, limit, return_eng=False):
-#     gbs_engs = []
-#     assert len(eng_files) == len(opt_files)
-#     for eng_file, opt_file in zip(eng_files, opt_files):
-#         gbs_cor = float(mol_manipulation.read_log_eng(opt_file)[-1])
-#         ee = float(mol_manipulation.read_log_eng(eng_file)[0])
-#         gbs_engs.append(gbs_cor + ee)
-#     min_conf = np.array(gbs_engs).argsort()
-#     min_opt_files = [opt_files[each] for each in min_conf][:limit]
-#     # print(gbs_engs)
-#     if return_eng:
-#         return min_opt_files,[gbs_engs[each] for each in min_conf][:limit]
-#     else:
-#         return min_opt_files
-
-# def write_coord(file_dir, symbol_list, positions):
-#     with open(file_dir, 'wt')as f:
-#         symbol_list = [s.lower() for s in symbol_list]
-#         f.write("$coord\n")
-#         for symbol, pos in zip(symbol_list, positions):
-#             f.write("    %.12f    %.12f    %.12f   %s\n" % (pos[0], pos[1], pos[2], symbol))
-#         f.write("$end\n")
-
 
 

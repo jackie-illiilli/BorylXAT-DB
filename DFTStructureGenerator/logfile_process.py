@@ -146,26 +146,6 @@ class Logfile():
                 self.is_right_ts = self.check_om(False)
                 pass
 
-    # def __repr__(self):
-    #     print("Logfile Name: %s" % self.file_dir)
-    #     print("Run Successful %s" % bool(self.normal_end))
-    #     print("Logfile Type as %s" % self.file_type)
-    #     print("Title: %s" % ' '.join([str(each) for each in self.title]))
-    #     print("Charge: %d, Multiplicity: %d" % (self.charge, self.multiplicity))
-    #     print("Symbol list:%s" % ' '.join(self.symbol_list))
-    #     print("Number of Unreal Freq: %d" % self.unreal_freq )
-    #     print("Method: %s" % self.method)
-    #     print("Optimization Steps: %d" % (len(self.running_positions) - 1))
-    #     print("Optimization Engs: %s" % ' '.join([str(each) for each in self.opt_engs]))
-    #     print("Final Engs: %s" % ' '.join([str(each) for each in self.all_engs]))
-    #     print("Elapse Time: %.3f min" % self.running_time)
-
-    #     if self.file_type == 'IRC':
-    #         print("IRC File Successful: %s" % bool(self.irc_result))
-    #     if self.file_type == 'TS':
-    #         print("TS File is Right: %s" % bool(self.is_right_ts))
-    #     return "End"
-
     def is_normal_end(self):
         """Detect "Normal termination of Gaussian"
 
