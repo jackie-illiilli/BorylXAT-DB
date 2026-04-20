@@ -1,5 +1,7 @@
 # Borane Radical C-Cl Activation Database
 
+[中文说明](docs/zh-CN/README.md) | [Database Structure](Database_Structure.md) | [数据库结构说明](docs/zh-CN/Database_Structure.md)
+
 This repository contains the workflow used to build, curate, analyze, and model a quantum-chemistry dataset for Lewis base activated borane radical mediated C-Cl bond activation. It is the code companion for the manuscript project on large-scale transition-state data generation, mechanism analysis, and machine-learning assisted reactivity prediction.
 
 The project combines:
@@ -100,7 +102,7 @@ Besides the main database files, the repository already includes several useful 
 - `Data/descriptor/*.pkl`: serialized descriptor maps used by the modeling notebook
 - `Figure/`: manuscript and SI figures exported from the analysis notebooks
 
-Database field details are described in [Database_Structure.md](Database_Structure.md).
+Database field details are described in [Database_Structure.md](Database_Structure.md). A Chinese version is available at [docs/zh-CN/Database_Structure.md](docs/zh-CN/Database_Structure.md).
 
 ## Electronic Structure Setup
 

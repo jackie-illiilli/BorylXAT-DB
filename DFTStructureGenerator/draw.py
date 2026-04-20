@@ -7,9 +7,10 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
 
 # ===== Smooth histogram =====
-def smooth_hist(data, bins=30):
+def smooth_hist(data, bins=30, frequence=True):
     hist, edges = np.histogram(data, bins=bins)
-    hist = hist / len(data)
+    if frequence:
+        hist = hist / len(data)
 
     centers = 0.5 * (edges[:-1] + edges[1:])
     spline = make_interp_spline(centers, hist, k=3)
@@ -25,9 +26,10 @@ def plot_distribution(ax, data, orientation='top',
                       bins=30,
                       color_line='black',
                       color_fill='lightgray',
-                      write_axis=False):
+                      write_axis=False, 
+                      frequence=True):
 
-    xs, ys = smooth_hist(data, bins)
+    xs, ys = smooth_hist(data, bins, frequence=frequence)
 
     if orientation == 'top':
         ax.plot(xs, ys, color=color_line, lw=1.2)
