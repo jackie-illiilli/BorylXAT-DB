@@ -216,6 +216,7 @@ def plot_line_with_metrics(
 
 def draw_correlation_map(
     x,
+    target=None,
     figure_size=(5, 5),
     colors='coolwarm',
     annot=True,
@@ -226,8 +227,14 @@ def draw_correlation_map(
 
     df = pd.DataFrame(x)
     correlation_matrix = np.abs(df.corr())
+    if target is not None:
+        target_series = pd.Series(target, index=df.index)
+        target_correlations = np.abs(df.corrwith(target_series))
+        np.fill_diagonal(correlation_matrix.values, target_correlations.to_numpy())
     mask = np.triu(np.ones_like(correlation_matrix, dtype=bool))
-    print(np.max(correlation_matrix.to_numpy()[~mask]))
+    if target is not None:
+        np.fill_diagonal(mask, False)
+    print("Max correlation: ", np.max(correlation_matrix.to_numpy()[~mask]))
     fig, ax = plt.subplots(figsize=figure_size, dpi=dpi)
     plt.rcParams['font.sans-serif'] = 'Arial'
     annot_kws = {"fontsize": 10}
