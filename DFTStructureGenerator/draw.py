@@ -17,6 +17,8 @@ def smooth_hist(data, bins=30, frequence=True):
 
     x_smooth = np.linspace(centers.min(), centers.max(), 300)
     y_smooth = spline(x_smooth)
+    # Cubic spline smoothing can overshoot below zero for sparse histograms.
+    y_smooth = np.clip(y_smooth, 0, None)
 
     return x_smooth, y_smooth
 

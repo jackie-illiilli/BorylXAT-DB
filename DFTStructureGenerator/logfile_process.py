@@ -55,7 +55,7 @@ class bond_addition_function():
 
 class Logfile():
     
-    def __init__(self, file_dir, mol_file_dir=None,read_title=True, freq_warning=False, bond_attach_std='mol', bond_addition_function=None, bond_ignore_list=None):
+    def __init__(self, file_dir, mol_file_dir=None,read_title=True, freq_warning=False, bond_attach_std='mol', bond_addition_function=None, bond_ignore_list=None, ignore_print=False):
         """Read Gaussian output file
 
         Args:
@@ -63,10 +63,12 @@ class Logfile():
             mol_file_dir (_type_, optional): Corresponding .mol file path, some functions depend on the mol file. Defaults to None.
             read_title (bool, optional): Whether to read title information according to the specified template. Defaults to True.
             freq_warning (bool, optional): Ignore (imaginary frequency and spin multiplicity) warnings. Defaults to False.
+            ignore_print (bool, optional): Whether to suppress warning print output from this Logfile. Defaults to False.
 
         Returns:
             _type_: _description_
         """        
+        self.ignore_print = ignore_print
         self.file_dir = file_dir
         self.mol_file_dir = mol_file_dir
         with open(file_dir, "rt") as rf:
@@ -87,7 +89,7 @@ class Logfile():
             self.error_reason = "link 9999"
 
         if self.multiplicity == -1:
-            print("It's not a logfile")
+            self._print("It's not a logfile")
             return None
 
         self.method = self.read_method().lower()
@@ -103,7 +105,7 @@ class Logfile():
 
         self.symbol_list, self.first_atom_position = self.read_first_position()
         if self.symbol_list == None:
-            print("It's a wrong file with unknown wrong")
+            self._print("It's a wrong file with unknown wrong")
             return None
         
         if self.file_type != "SPE":
@@ -140,11 +142,15 @@ class Logfile():
 
         if self.file_type == "TS" and read_title:
             if self.unreal_freq != 1:
-                print("%s is not a right TS for unreal freq num of %d" % (self.file_dir, self.unreal_freq) )
+                self._print("%s is not a right TS for unreal freq num of %d" % (self.file_dir, self.unreal_freq) )
                 self.is_right_ts = False
             else:
                 self.is_right_ts = self.check_om(False)
                 pass
+
+    def _print(self, *args, **kwargs):
+        if not self.ignore_print:
+            print(*args, **kwargs)
 
     def is_normal_end(self):
         """Detect "Normal termination of Gaussian"
@@ -157,7 +163,7 @@ class Logfile():
         """    
         lastline = self.filelines[-1]
         if lastline.find(" Normal termination of Gaussian") == -1:
-            print("%s didn't run successful" % self.file_dir)
+            self._print("%s didn't run successful" % self.file_dir)
             return False
         else: return True
 
@@ -173,7 +179,7 @@ class Logfile():
         # title = $$$$Title####charge????
         if allfile.find("$$$$") == -1 or allfile.find("####") == -1 or allfile.find("????") == -1:
             title = ""
-            print("Can't find title")
+            self._print("Can't find title")
         else:
             title = allfile[allfile.find("$$$$") + 4: allfile.find("####")]
             charge = allfile[allfile.find("####") + 4: allfile.find("????")]
@@ -190,7 +196,7 @@ class Logfile():
         """        
         line_id, line = Tool.find_first_line(self.filelines, 'Charge = ', 'in')
         if line_id is None:
-            print("Can't find charge and multiplicity")
+            self._print("Can't find charge and multiplicity")
             return 0, -1
         charge = int(line.split()[2])
         multiplicity = int(line.split()[-1])
@@ -217,7 +223,7 @@ class Logfile():
             start_index = start_id + 2
             end_index = Tool.find_first_line(self.filelines[start_index:], ' \n', 'all')[0] + start_index
             if end_index is None:
-                print("%s didn't have structure" % self.file_dir)
+                self._print("%s didn't have structure" % self.file_dir)
                 return None, None
             # start_index = [i for i, line in enumerate(self.filelines) if line.find("Symbolic Z-matrix:") >= 0][0] + 2
             # end_index = [i + start_index for i, line in enumerate(self.filelines[start_index:]) if line == ' \n'][0]
@@ -234,7 +240,7 @@ class Logfile():
                 symbol, positions = self.read_running_position(read_first=1)
                 return symbol, positions
             except:
-                print("%s didn't have structure" % self.file_dir)
+                self._print("%s didn't have structure" % self.file_dir)
                 return None, None
 
     def read_running_position(self, read_first=False):
@@ -256,7 +262,7 @@ class Logfile():
             orientation_sign = "Standard orientation:"
             start_indexs = [i for i, line in enumerate(self.filelines) if line.find(orientation_sign) >= 0]
         if len(start_indexs) == 0:
-            print("%s Even not Input Structure, wrong file maybe" % self.file_dir)
+            self._print("%s Even not Input Structure, wrong file maybe" % self.file_dir)
             return None
         all_positions = []
         for each_start_index in start_indexs:
@@ -285,7 +291,7 @@ class Logfile():
         if method is None:
             method_id, method = Tool.find_first_line(self.filelines, ' #', 'start')
             if method is None:
-                print("%s with not method" % self.file_dir)
+                self._print("%s with not method" % self.file_dir)
                 return None
         method_final_line_id, _ = Tool.find_first_line(self.filelines[method_id:], " -------", 'start')
         method = "".join([each.strip("\n").lstrip(" ") for each in self.filelines[method_id: method_id + method_final_line_id]])
@@ -307,7 +313,7 @@ class Logfile():
         smallest_freq_index, smallest_freq_line = Tool.find_first_line(self.filelines[start_index:], ' Frequencies --', "start")
         smallest_freq_index += start_index
         if smallest_freq_index == None:
-            print("%s didn't calc freq" % self.file_dir)
+            self._print("%s didn't calc freq" % self.file_dir)
             return -1, []
         smallest_freq_list = smallest_freq_line.strip("\n").split()[2:]
         num_unreal_freq = sum([1 for each in smallest_freq_list if float(each) < 0])
@@ -322,7 +328,7 @@ class Logfile():
             matrix.append(line)
             start_id += 1
         if freq_warning:
-            print("%s have unreal freq" % self.file_dir)
+            self._print("%s have unreal freq" % self.file_dir)
         return num_unreal_freq, matrix, smallest_freq_list[0]
 
     def read_log_eng(self): 
@@ -338,7 +344,7 @@ class Logfile():
         opt_engs = []
         ee_line = [[idx, each] for idx, each in enumerate(self.filelines) if " SCF Done: " in each] 
         if len(ee_line) == 0:
-            print("%s, can't find any engs" % self.file_dir)
+            self._print("%s, can't find any engs" % self.file_dir)
             return all_engs, opt_engs
         for line_id, each_ee_line in ee_line:
             # ee_line = [line for i, line in enumerate(
@@ -398,7 +404,7 @@ class Logfile():
         errorline_id = [i for i, line in enumerate(self.filelines) if " Error termination" in line]
         # errorline_id = Tool.find_first_line(self.filelines,"start")[0]
         if len(errorline_id) == 0 and not self.normal_end:
-            print(self.file_dir, "Should have not finished")
+            self._print(self.file_dir, "Should have not finished")
             error_reason_line = "unfinished"
         else:
             errorline_id = errorline_id[-1]
@@ -470,7 +476,7 @@ class Logfile():
             shutil.move(self.file_dir, new_log_name)
 
         else:
-            print("%s. Error Reason is link 9999 or unfinished." % self.file_dir)
+            self._print("%s. Error Reason is link 9999 or unfinished." % self.file_dir)
             title = " ".join(str(each) for each in self.title)
             if len(self.running_positions) != 0:
                 opt_engs = deepcopy(self.opt_engs) 
@@ -603,7 +609,7 @@ class Logfile():
         if self.angle_idx.all():
             new_position = self.l103_adjust()
         else:
-            print('!!! Warning file: %s; Unknown Error：%s'%(self.file_dir, self.error_reason))
+            self._print('!!! Warning file: %s; Unknown Error：%s'%(self.file_dir, self.error_reason))
             new_position = self.running_positions[-2]
         return new_position
 
@@ -625,7 +631,7 @@ class Logfile():
             mol = Chem.MolFromMolFile(self.mol_file_dir, removeHs=False, sanitize=False)
             for atom_id, atom in enumerate(mol.GetAtoms()):
                 if atom.GetSymbol() != self.symbol_list[atom_id] and atom.GetAtomicNum() != self.symbol_list[atom_id]:
-                    print("wrong with", atom.GetIdx(), atom.GetAtomicNum(), atom_id, self.symbol_list[atom_id])
+                    self._print("wrong with", atom.GetIdx(), atom.GetAtomicNum(), atom_id, self.symbol_list[atom_id])
                     return False
             if standard_file == "mol":
                 position = mol.GetConformer(0).GetPositions()
@@ -650,9 +656,9 @@ class Logfile():
                     if start_atom_id in except_idx and end_atom_id in except_idx:
                         ignore=True
                 if print_num:
-                    print("%d %d %.5f" % (start_atom_id, end_atom_id, num))
+                    self._print("%d %d %.5f" % (start_atom_id, end_atom_id, num))
                 if (num <= 0.75 or num >= 1.3) and not ignore:
-                    print(os.path.split(self.file_dir)[-1], start_atom_id, end_atom_id, "with a wrong distance", num)
+                    self._print(os.path.split(self.file_dir)[-1], start_atom_id, end_atom_id, "with a wrong distance", num)
                     return False
             if bond_addition_function is not None:
                 if not bond_addition_function.apply_addition(title, new_position):
@@ -671,7 +677,7 @@ class Logfile():
             end_atom_id = except_idx[1]
             distance = Tool.get_atoms_distance(new_position[start_atom_id], new_position[end_atom_id])
             if distance <= 2.2:
-                print(os.path.split(self.file_dir)[-1], start_atom_id, end_atom_id, "atom may ircorrect", distance)
+                self._print(os.path.split(self.file_dir)[-1], start_atom_id, end_atom_id, "atom may ircorrect", distance)
                 return id
         return -1
 
@@ -739,7 +745,7 @@ class Logfile():
         if TF:
             return 1
         else:
-            print("%s may find wrong TS" % self.file_dir)
+            self._print("%s may find wrong TS" % self.file_dir)
         return 0
 
     def read_charge_spin_density(self):
@@ -820,7 +826,7 @@ class Logfile():
         lines = self.filelines
         dipole_line_id = [line_id for line_id, line in enumerate(lines) if line.startswith(" Dipole moment ")]
         if len(dipole_line_id) == 0:
-            print(self.filelines, "did't have a dipole moment")
+            self._print(self.filelines, "did't have a dipole moment")
             return -1
 
         dipole_line = lines[dipole_line_id[-1] + 1]
