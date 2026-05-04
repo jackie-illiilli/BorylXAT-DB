@@ -20,12 +20,12 @@
 - 386 种路易斯碱
 - 179 种氯代底物
 
-这些组合会经过热力学筛选后再进入过渡态计算。当前仓库内已经包含最终数据库文件：
+这些组合会经过热力学筛选后再进入过渡态计算。当前生成的最终数据库文件为：
 
-- `boron_ccl2.db`：ASE SQLite 数据库，共 `50056` 条结构
-- `boron_ccl_dataset2.parquet`：扁平化 Parquet 数据集
+- `boron_ccl.db`：ASE SQLite 数据库，共 `50057` 条结构
+- `boron_ccl_dataset.parquet`：扁平化 Parquet 数据集
 
-当前数据库中的结构类别分布为：
+当前 ASE 数据库中的结构类别分布为：
 
 | 类别 | 数量 |
 | --- | ---: |
@@ -35,9 +35,9 @@
 | `complex_r` | 20010 |
 | `complex_p` | 20010 |
 | `c_radical` | 179 |
-| `ts` | 9236 |
+| `ts` | 9237 |
 
-论文叙述中的数量与当前仓库产物之间存在少量差异，通常对应不同版本的数据筛选或导出结果。
+正文中的反应空间按 386 种 Lewis 碱统计，因为其中一个单体 Lewis 碱条目（`LB_00623`）与任意硼自由基形成 B-LB 复合物时在热力学上都不够稳定。数据库为了保留来源信息，仍在 `LB` 类别中保留该分子；但它不会出现在筛选后的 B-LB 复合物集合或 TS 反应条目中。
 
 ## 科学问题
 
@@ -68,7 +68,7 @@
 | --- | --- |
 | `1_Calc_Reactant.ipynb` | 反应物整理、反应位点枚举、xTB 构象采样，以及硼自由基、路易斯碱、氯代底物和 B-LB 复合物的 DFT 输入生成 |
 | `2_Calc_TS.ipynb` | TS 初猜构建、限制优化、TS 搜索、单点能校正、IRC 分析和 TS 汇总 |
-| `3_Build_DataBase.ipynb` | 将解析后的结构和能量信息整合为 `boron_ccl2.db` 与 `boron_ccl_dataset2.parquet`，并生成分析图 |
+| `3_Build_DataBase.ipynb` | 将解析后的结构和能量信息整合为 `boron_ccl.db` 与 `boron_ccl_dataset.parquet`，并生成分析图 |
 | `4_Benchmark.ipynb` | 小规模参考数据集上的 DFT 方法 benchmark |
 | `5_draw_molecule.ipynb` | 论文和 SI 所需分子图绘制 |
 | `6_Modeling.ipynb` | 描述符生成、CatBoost 建模以及 OOD 分析 |
@@ -149,8 +149,8 @@
 
 如果只想使用最终数据，可直接从这些文件开始：
 
-- `boron_ccl2.db`
-- `boron_ccl_dataset2.parquet`
+- `boron_ccl.db`
+- `boron_ccl_dataset.parquet`
 - `Data/descriptor/*.pkl`
 
 ## 复用说明
@@ -158,4 +158,4 @@
 - `B_00001`、`LB_00001`、`Cl_00001_r`、`B_00001_LB_00001_Cl_00001` 这类命名规则贯穿整个仓库。
 - 不少脚本默认沿用历史 HPC 目录结构，重新部署时通常需要先调整路径。
 - 仓库中已经包含许多生成后的结果文件；若要从零完整复现，仍需要原始 Gaussian/xTB 计算环境。
-- 论文叙述与当前仓库实现大体一致，但个别统计量可能因为版本更新存在轻微差异。
+- 正文中的 Lewis 碱数量为 386，而数据库保留 387 个单体 `LB` 条目；额外的 `LB_00623` 仅作为来源记录保留，不参与稳定 B-LB 复合物和 TS 条目。

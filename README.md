@@ -20,12 +20,12 @@ According to the manuscript outline, the study targets a reaction space built fr
 - 386 Lewis bases in the manuscript description
 - 179 chloride substrates
 
-This combinatorial space is filtered before TS calculation. The current generated database files included in this repository are:
+This combinatorial space is filtered before TS calculation. The current generated database files are:
 
-- `boron_ccl2.db`: ASE SQLite database with `50056` structures
-- `boron_ccl_dataset2.parquet`: flattened Parquet dataset
+- `boron_ccl.db`: ASE SQLite database with `50057` structures
+- `boron_ccl_dataset.parquet`: flattened Parquet dataset
 
-The bundled ASE database currently contains:
+The current ASE database contains:
 
 | Category | Count |
 | --- | ---: |
@@ -35,9 +35,9 @@ The bundled ASE database currently contains:
 | `complex_r` | 20010 |
 | `complex_p` | 20010 |
 | `c_radical` | 179 |
-| `ts` | 9236 |
+| `ts` | 9237 |
 
-The slight mismatch between manuscript-facing counts and current repository artifacts likely reflects version differences in filtering or data export.
+The manuscript-facing reaction space counts 386 Lewis bases because one standalone Lewis base entry (`LB_00623`) does not form thermodynamically stable B-LB complexes with any borane radical. The database intentionally retains this molecule in the `LB` category for provenance, but it does not appear in the filtered B-LB complex set or TS reaction entries.
 
 ## Scientific Goal
 
@@ -68,7 +68,7 @@ The main entry points are the notebooks in repository root:
 | --- | --- |
 | `1_Calc_Reactant.ipynb` | Reactant preparation, reaction-site enumeration, xTB conformer sampling, and DFT setup for boranes, Lewis bases, chlorides, and B-LB complexes |
 | `2_Calc_TS.ipynb` | TS guess generation, constrained optimization, TS search, SPE correction, IRC analysis, and TS summary generation |
-| `3_Build_DataBase.ipynb` | Consolidates parsed outputs into `boron_ccl2.db` and `boron_ccl_dataset2.parquet`, and prepares analysis figures |
+| `3_Build_DataBase.ipynb` | Consolidates parsed outputs into `boron_ccl.db` and `boron_ccl_dataset.parquet`, and prepares analysis figures |
 | `4_Benchmark.ipynb` | DFT method benchmarking against a smaller reference set |
 | `5_draw_molecule.ipynb` | Molecule drawing helpers for figures and SI |
 | `6_Modeling.ipynb` | Descriptor generation and CatBoost modeling for reactivity prediction and OOD analysis |
@@ -149,8 +149,8 @@ If you want to rerun the full pipeline, the intended order is:
 
 If you only want the final structured dataset, start from the existing files:
 
-- `boron_ccl2.db`
-- `boron_ccl_dataset2.parquet`
+- `boron_ccl.db`
+- `boron_ccl_dataset.parquet`
 - `Data/descriptor/*.pkl`
 
 For programmatic access to the ASE database:
@@ -158,7 +158,7 @@ For programmatic access to the ASE database:
 ```python
 from ase.db import connect
 
-db = connect("boron_ccl2.db")
+db = connect("boron_ccl.db")
 ts_rows = list(db.select(category="ts"))
 print(len(ts_rows))
 print(ts_rows[0].key_value_pairs)
@@ -169,7 +169,7 @@ print(ts_rows[0].key_value_pairs)
 - Naming conventions such as `B_00001`, `LB_00001`, `Cl_00001_r`, and `B_00001_LB_00001_Cl_00001` are central to the whole workflow.
 - Many scripts assume the historical folder layout used for HPC calculations, so path adjustments may be needed before full reruns.
 - The repository contains generated artifacts; reproducing every calculation from scratch requires the original Gaussian/xTB runtime environment.
-- The manuscript outline describes the scientific story, while this repository reflects the current implementation state. In a few places, the code and manuscript wording may differ slightly across versions.
+- The manuscript-facing Lewis base count is 386, while the database retains 387 standalone `LB` entries because `LB_00623` is kept for provenance but is absent from stable B-LB complexes and TS entries.
 
 ## Repository Status
 

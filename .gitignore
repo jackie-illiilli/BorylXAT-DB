@@ -1,0 +1,57 @@
+# Python caches and build artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+build/
+dist/
+*.egg-info/
+
+# Jupyter and local editor state
+.ipynb_checkpoints/
+.vscode/
+
+# Local environments
+.venv/
+venv/
+env/
+.env
+.env.*
+
+# OS cruft
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Large database artifacts kept out of Git; archive release copies on Zenodo
+*.db
+*.sqlite
+*.sqlite3
+*.db-shm
+*.db-wal
+
+# Heavy or regenerated computational chemistry outputs
+*.chk
+*.fchk
+*.rwf
+*.wfn
+*.wfx
+*.cub
+*.cube
+*.log
+*.out
+*.err
+*.pbs.o*
+*.pbs.e*
+jobID.*
+
+# Generated ML/training logs and scratch outputs
+catboost_info/
+Ignored/
+
+# Local scratch/test files
+test.ipynb
+test.png
+SI_temp.txt

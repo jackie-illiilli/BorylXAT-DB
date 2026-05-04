@@ -11,8 +11,8 @@ import numpy as np
 from ase import Atoms
 from ase.db import connect
 
-OUTPUT_ASE_DB = "boron_ccl2.db"
-OUTPUT_PARQUET = "boron_ccl_dataset2.parquet"
+OUTPUT_ASE_DB = "boron_ccl.db"
+OUTPUT_PARQUET = "boron_ccl_dataset.parquet"
 
 # Regular patterns (adapted to the latest Cl_xxxxx_r)
 PATTERNS = {

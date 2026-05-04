@@ -160,7 +160,7 @@ def _build_cl_descriptor(row, db, duplicate_cl_ids):
 
 
 def build_descriptor_maps(
-    db_path="boron_ccl2.db",
+    db_path="boron_ccl.db",
     bn_csv_path="data/csvs/reactants_B_N.csv",
     cl_csv_path="data/csvs/reactants_Cl.csv",
     duplicate_cl_ids=None,

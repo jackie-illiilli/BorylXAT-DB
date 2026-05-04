@@ -1,0 +1,28 @@
+{
+  "title": "BorylXAT-DB: A DFT transition-state database for Lewis base activated boryl-radical C-Cl activation",
+  "upload_type": "dataset",
+  "description": "BorylXAT-DB contains DFT-derived structures, thermodynamic and kinetic parameters, reaction mappings, electronic descriptors, and transition-state validation information for Lewis base activated boryl-radical mediated C-Cl activation. The release provides ASE SQLite and Parquet data products together with analysis and modeling code.",
+  "creators": [
+    {
+      "name": "BorylXAT-DB contributors"
+    }
+  ],
+  "access_right": "open",
+  "license": "cc-by-4.0",
+  "keywords": [
+    "boryl radical",
+    "C-Cl activation",
+    "halogen atom transfer",
+    "transition state",
+    "DFT",
+    "reaction database",
+    "machine learning"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/jackie-illiilli/Borane_Radical_Database",
+      "relation": "isSupplementTo",
+      "scheme": "url"
+    }
+  ]
+}
