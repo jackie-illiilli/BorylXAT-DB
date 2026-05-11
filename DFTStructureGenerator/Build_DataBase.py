@@ -14,6 +14,21 @@ from ase.db import connect
 OUTPUT_ASE_DB = "boron_ccl.db"
 OUTPUT_PARQUET = "boron_ccl_dataset.parquet"
 
+AMINE_LB_IDS = frozenset(range(0, 69))
+PHOSPHINE_LB_IDS = frozenset(range(69, 144))
+NHC_LB_IDS = frozenset(range(144, 234))
+ARYL_N_LB_IDS = frozenset(range(234, 388))
+
+LB_TYPE_ORDER = ["Amine/Aryl N", "Phosphine", "NHC"]
+B_TYPE_ORDER = ["BR3", "R2BH", "RBH2", "BH3"]
+CL_SUBSTRATE_TYPE_ORDER = ["CCl4", "CCl3", "CCl2", "CCl"]
+CL_CARBON_HYBRIDIZATION_TYPE_ORDER = ["C(sp3)-Cl", "C(sp2)-Cl", "C(sp)-Cl"]
+CL_SUBSTRATE_SMARTS = [
+    ("CCl4", "Cl*(Cl)(Cl)Cl"),
+    ("CCl3", "Cl*(Cl)Cl"),
+    ("CCl2", "Cl*Cl"),
+]
+
 # Regular patterns (adapted to the latest Cl_xxxxx_r)
 PATTERNS = {
     'B':     re.compile(r'^B_(\d{5})$'),
@@ -38,6 +53,173 @@ def classify_key(key: str):
             if pat == 'ts':         return 'ts',        (groups[0], groups[1], groups[2])
             if pat == 'c_radical':  return 'c_radical', (np.nan, np.nan, groups[0])
     return 'unknown', None
+
+
+def _get_chem():
+    from rdkit import Chem
+
+    return Chem
+
+
+def _as_db(db_or_path):
+    if hasattr(db_or_path, "select"):
+        return db_or_path
+    return connect(db_or_path)
+
+
+def get_lb_type(lb_id):
+    """Classify Lewis base ids using the dataset index ranges."""
+    lb_id = int(lb_id)
+    if lb_id in AMINE_LB_IDS or lb_id in ARYL_N_LB_IDS:
+        return "Amine/Aryl N"
+    if lb_id in PHOSPHINE_LB_IDS:
+        return "Phosphine"
+    if lb_id in NHC_LB_IDS:
+        return "NHC"
+    return "Other"
+
+
+def get_boron_type(smiles):
+    """Classify boron radical type by the number of hydrogens on boron."""
+    Chem = _get_chem()
+    mol = Chem.MolFromSmiles(smiles)
+    if mol is None:
+        raise ValueError(f"Invalid boron radical SMILES: {smiles}")
+
+    b_atoms = [atom for atom in mol.GetAtoms() if atom.GetSymbol() == "B"]
+    if not b_atoms:
+        raise ValueError(f"No boron atom found in SMILES: {smiles}")
+
+    n_h = b_atoms[0].GetTotalNumHs()
+    return {0: "BR3", 1: "R2BH", 2: "RBH2", 3: "BH3"}.get(n_h, f"BH{n_h}")
+
+
+def get_cl_substrate_type(smiles):
+    """Classify chloride substrates by the number of chlorine substituents."""
+    Chem = _get_chem()
+    mol = Chem.MolFromSmiles(smiles)
+    if mol is None:
+        raise ValueError(f"Invalid chloride substrate SMILES: {smiles}")
+
+    mol = Chem.AddHs(mol)
+    for substrate_type, smarts in CL_SUBSTRATE_SMARTS:
+        if mol.HasSubstructMatch(Chem.MolFromSmarts(smarts)):
+            return substrate_type
+    return "CCl"
+
+
+def get_cl_carbon_hybridization_type(smiles, cl_atom_id=None):
+    """Classify a chloride substrate by the hybridization of the C atom bonded to Cl."""
+    Chem = _get_chem()
+    mol = Chem.MolFromSmiles(smiles)
+    if mol is None:
+        raise ValueError(f"Invalid chloride substrate SMILES: {smiles}")
+
+    if cl_atom_id is None:
+        cl_atoms = [atom for atom in mol.GetAtoms() if atom.GetSymbol() == "Cl"]
+        if not cl_atoms:
+            raise ValueError(f"No chlorine atom found in SMILES: {smiles}")
+        cl_atom = cl_atoms[0]
+    else:
+        cl_atom = mol.GetAtomWithIdx(int(cl_atom_id))
+        if cl_atom.GetSymbol() != "Cl":
+            raise ValueError(f"Atom {cl_atom_id} is not chlorine in SMILES: {smiles}")
+
+    carbon_neighbors = [
+        atom for atom in cl_atom.GetNeighbors()
+        if atom.GetSymbol() == "C"
+    ]
+    if not carbon_neighbors:
+        return "Other"
+
+    hybridization = carbon_neighbors[0].GetHybridization()
+    hybridization_name = str(hybridization).split(".")[-1].lower()
+    if hybridization_name in {"sp3", "sp2", "sp"}:
+        return f"C({hybridization_name})-Cl"
+    return f"C({hybridization_name})-Cl"
+
+
+def build_boron_type_map(db_or_path=OUTPUT_ASE_DB):
+    """Return {B_id: B_type} for all boron radical rows in the ASE database."""
+    db = _as_db(db_or_path)
+    return {
+        int(row.B_id): get_boron_type(row.smiles)
+        for row in db.select(category="B")
+    }
+
+
+def build_lb_type_map(db_or_path=OUTPUT_ASE_DB):
+    """Return {LB_id: LB_type} for all Lewis base rows in the ASE database."""
+    db = _as_db(db_or_path)
+    return {
+        int(row.LB_id): get_lb_type(row.LB_id)
+        for row in db.select(category="LB")
+    }
+
+
+def build_cl_substrate_type_map(db_or_path=OUTPUT_ASE_DB):
+    """Return {Cl_id: Cl_type} for all chloride substrate rows in the ASE database."""
+    db = _as_db(db_or_path)
+    return {
+        int(row.Cl_id): get_cl_substrate_type(row.smiles)
+        for row in db.select(category="Cl")
+    }
+
+
+def add_reactant_type_columns(ts_df, db_or_path=OUTPUT_ASE_DB):
+    """Add LB_type, B_type, and Cl_type columns to a TS dataframe."""
+    typed_df = ts_df.copy()
+    typed_df["LB_type"] = typed_df["LB_id"].map(build_lb_type_map(db_or_path))
+    typed_df["B_type"] = typed_df["B_id"].map(build_boron_type_map(db_or_path))
+    typed_df["Cl_type"] = typed_df["Cl_id"].map(build_cl_substrate_type_map(db_or_path))
+    return typed_df
+
+
+def build_ts_type_distribution_dataframe(db_or_path=OUTPUT_ASE_DB):
+    """Build the TS dataframe used by the 9237 TS type-distribution plot."""
+    db = _as_db(db_or_path)
+    ts_df = pd.DataFrame([
+        {
+            "key": row.key,
+            "B_id": int(row.B_id),
+            "LB_id": int(row.LB_id),
+            "Cl_id": int(row.Cl_id),
+            "barrier_kcal": getattr(row, "barrier_kcal", np.nan),
+            "delta_g_rxn_kcal": getattr(row, "delta_g_rxn_kcal", np.nan),
+        }
+        for row in db.select(category="ts")
+    ])
+    if ts_df.empty:
+        return pd.DataFrame(
+            columns=[
+                "key",
+                "B_id",
+                "LB_id",
+                "Cl_id",
+                "barrier_kcal",
+                "delta_g_rxn_kcal",
+                "LB_type",
+                "B_type",
+                "Cl_type",
+            ]
+        )
+    return add_reactant_type_columns(ts_df, db)
+
+
+def add_bep_type_columns(df):
+    """Add reactant-type columns used by BEP plots to a reaction dataframe."""
+    typed_df = df.copy()
+    typed_df["B_type"] = typed_df["B_smiles"].map(get_boron_type)
+    typed_df["LB_type"] = typed_df["N_Index"].map(get_lb_type)
+    typed_df["Cl_type"] = typed_df["Cl_smiles"].map(get_cl_substrate_type)
+    typed_df["Cl_hybrid_type"] = typed_df.apply(
+        lambda row: get_cl_carbon_hybridization_type(
+            row["Cl_smiles"],
+            row["Cl_Atomid"],
+        ),
+        axis=1,
+    )
+    return typed_df
 
 def build_databases(data_dict: dict, rewrite: bool = True):
     """

@@ -3,6 +3,7 @@
 from copy import deepcopy
 import numpy as np
 import os, glob
+import re
 import shutil
 from rdkit import Chem
 
@@ -78,7 +79,8 @@ class Logfile():
         self.normal_end = self.is_normal_end()
         if not self.normal_end:
             self.find_error_reason()
-        # self.S_2 = self.read_S_2()
+        self.S_2 = self.read_S_2()
+        self.S_2_after_annihilation = self.read_S_2(after_annihilation=True)
         if read_title:
             self.title = self.read_title()
         self.charge, self.multiplicity = self.read_charge_multiplicity()
@@ -202,15 +204,40 @@ class Logfile():
         multiplicity = int(line.split()[-1])
         return charge, multiplicity
 
-    def read_S_2(self):
-        lines = [[idx, each] for idx, each in enumerate(self.filelines) if "<S**2>" in each]
-        if len(lines) == 0:
-            return -1
-        else:
-            _, line_ = lines[-1]
-            line_ = line_.strip("\n").split()
-            idx = [idx for idx, each in enumerate(line_) if "S**2" in each][0]
-            return float(line_[idx+1])
+    def read_S_2(self, after_annihilation=False):
+        """Read the final S**2 value from Gaussian output.
+
+        Args:
+            after_annihilation (bool, optional): When Gaussian prints an
+                annihilation-corrected value, return the final "after" value.
+                Defaults to False.
+
+        Returns:
+            float: Final S**2 value, or -1 if it cannot be found.
+        """
+        s2_value = -1
+        s2_after_annihilation = -1
+        float_pattern = r"[-+]?\d*\.?\d+(?:[Ee][-+]?\d+)?"
+        s2_pattern = re.compile(r"<S\*\*2>\s*=\s*(%s)" % float_pattern)
+        annihilation_pattern = re.compile(
+            r"S\*\*2\s+before\s+annihilation\s+(%s),?\s+after\s+(%s)" %
+            (float_pattern, float_pattern)
+        )
+
+        for line in self.filelines:
+            s2_match = s2_pattern.search(line)
+            if s2_match:
+                s2_value = float(s2_match.group(1))
+                s2_after_annihilation = -1
+
+            annihilation_match = annihilation_pattern.search(line)
+            if annihilation_match:
+                s2_value = float(annihilation_match.group(1))
+                s2_after_annihilation = float(annihilation_match.group(2))
+
+        if after_annihilation and s2_after_annihilation != -1:
+            return s2_after_annihilation
+        return s2_value
 
     def read_first_position(self):
         """Read the element names and input coordinates of the molecule from the output file; can run even if Gaussian reports certain errors
