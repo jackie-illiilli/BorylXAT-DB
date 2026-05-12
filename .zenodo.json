@@ -20,8 +20,8 @@
   ],
   "related_identifiers": [
     {
-      "identifier": "https://github.com/jackie-illiilli/Borane_Radical_Database",
-      "relation": "isSupplementTo",
+      "identifier": "https://github.com/jackie-illiilli/BorylXAT-DB",
+      "relation": "isSupplementedBy",
       "scheme": "url"
     }
   ]

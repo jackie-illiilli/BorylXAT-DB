@@ -4,6 +4,8 @@
 
 This repository contains the workflow used to build, curate, analyze, and model a quantum-chemistry dataset for Lewis base activated borane radical mediated C-Cl bond activation. It is the code companion for the manuscript project on large-scale transition-state data generation, mechanism analysis, and machine-learning assisted reactivity prediction.
 
+Public code repository: <https://github.com/jackie-illiilli/BorylXAT-DB>. Large database files are distributed through Zenodo: <https://doi.org/10.5281/zenodo.20134535>.
+
 The project combines:
 
 - reaction-space enumeration from borane, Lewis base, and chloride substrate libraries
@@ -195,6 +197,20 @@ If you only want the final structured dataset, start from the existing files:
 - `BorylXAT-DB.db`
 - `BorylXAT-DB.parquet`
 - `Data/descriptor/*.pkl`
+
+If the two database files are not present after cloning the code repository, download them from the Zenodo dataset record and place them in the repository root:
+
+```bash
+curl -L -o BorylXAT-DB.db "https://zenodo.org/records/20134535/files/BorylXAT-DB.db?download=1"
+curl -L -o BorylXAT-DB.parquet "https://zenodo.org/records/20134535/files/BorylXAT-DB.parquet?download=1"
+```
+
+On Windows PowerShell:
+
+```powershell
+Invoke-WebRequest -Uri "https://zenodo.org/records/20134535/files/BorylXAT-DB.db?download=1" -OutFile "BorylXAT-DB.db"
+Invoke-WebRequest -Uri "https://zenodo.org/records/20134535/files/BorylXAT-DB.parquet?download=1" -OutFile "BorylXAT-DB.parquet"
+```
 
 For programmatic access to the ASE database:
 

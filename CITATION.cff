@@ -4,8 +4,8 @@ title: "BorylXAT-DB: A DFT transition-state database for Lewis base activated bo
 type: dataset
 version: 1.0.0
 date-released: 2026-05-04
-repository-code: "https://github.com/jackie-illiilli/Borane_Radical_Database"
-url: "https://github.com/jackie-illiilli/Borane_Radical_Database"
+repository-code: "https://github.com/jackie-illiilli/BorylXAT-DB"
+url: "https://doi.org/10.5281/zenodo.20134535"
 license: "CC-BY-4.0"
 doi: "10.5281/zenodo.20134535"
 authors:
