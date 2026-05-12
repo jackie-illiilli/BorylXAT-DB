@@ -6,8 +6,8 @@ from rdkit.Chem import Draw
 from rdkit.Chem import AllChem
 from rdkit.Chem.Draw import MolDrawing, DrawingOptions
 from rdkit.Geometry import Point3D
-from . import FormatConverter, xtb_process
-from . import Tool, logfile_process, B_N_Cl
+from . import FormatConverter, borane_xat_workflow, xtb_process
+from . import Tool, logfile_process
 op_dir = "../files/"
 
 DrawingOptions.bondLineWidth = 1.8
