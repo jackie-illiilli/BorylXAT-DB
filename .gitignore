@@ -31,6 +31,8 @@ desktop.ini
 *.sqlite3
 *.db-shm
 *.db-wal
+*.parquet
+Miniforge*.sh
 
 # Heavy or regenerated computational chemistry outputs
 *.chk
