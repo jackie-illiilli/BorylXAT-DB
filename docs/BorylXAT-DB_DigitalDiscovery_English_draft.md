@@ -164,7 +164,7 @@ There are no conflicts to declare.
 
 ## Data Availability
 
-The complete BorylXAT-DB dataset will be made available through [Repository Name] with a permanent DOI: [DOI]. The release will include the ASE SQLite database, Parquet tables, metadata files, and example scripts. Data-analysis and machine-learning code will be openly available at [GitHub URL]. The database is planned for release under a CC BY 4.0 licence.
+The complete BorylXAT-DB dataset is available through Zenodo with a permanent DOI: https://doi.org/10.5281/zenodo.20134535. The release includes the ASE SQLite database, Parquet tables, metadata files, and example scripts. Data-analysis and machine-learning code will be openly available at [GitHub URL]. The database is released under a CC BY 4.0 licence.
 
 ## Acknowledgements
 

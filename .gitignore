@@ -52,6 +52,7 @@ jobID.*
 # Generated ML/training logs and scratch outputs
 catboost_info/
 Ignored/
+BorylXAT-DB_release/
 
 # Local scratch/test files
 test.ipynb
