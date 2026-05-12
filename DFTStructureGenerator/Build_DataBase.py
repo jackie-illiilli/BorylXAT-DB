@@ -1,5 +1,5 @@
 # =============================================================================
-# Boron Radical Catalyzed C-Cl Activation Dataset: One-Click Structured Database Building Script (2025 Enhanced Version v2)
+# BorylXAT-DB: One-Click Structured Database Building Script (2025 Enhanced Version v2)
 # Added: Storage of ΔG‡ / ΔG_rxn + bidirectional reaction mapping in ASE.db
 #       + imaginary frequency / IRC / Hirshfeld charges / dipole moment / spin density / frontier orbital energy
 # =============================================================================
@@ -11,8 +11,8 @@ import numpy as np
 from ase import Atoms
 from ase.db import connect
 
-OUTPUT_ASE_DB = "boron_ccl.db"
-OUTPUT_PARQUET = "boron_ccl_dataset.parquet"
+OUTPUT_ASE_DB = "BorylXAT-DB.db"
+OUTPUT_PARQUET = "BorylXAT-DB.parquet"
 
 AMINE_LB_IDS = frozenset(range(0, 69))
 PHOSPHINE_LB_IDS = frozenset(range(69, 144))

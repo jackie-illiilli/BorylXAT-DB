@@ -1,5 +1,5 @@
 def main():
-    print("Hello from 22-borane-radical-database!")
+    print("Hello from BorylXAT-DB!")
 
 
 if __name__ == "__main__":

@@ -4,8 +4,8 @@
 
 Based on the logic in `Build_DataBase.py`, the database-building workflow generates two core files for structured storage of DFT-derived 3D structures and thermodynamic data. The two formats serve different use cases:
 
-1. **`boron_ccl.db`** (ASE SQLite database): intended for use with ASE (Atomic Simulation Environment), enabling efficient storage of `Atoms` objects, searchable key-value metadata, and reaction mapping.
-2. **`boron_ccl_dataset.parquet`** (Parquet dataset): a flattened tabular dataset containing coordinates, atomic numbers, and descriptors, suitable for Pandas, PyArrow, and downstream machine-learning workflows.
+1. **`BorylXAT-DB.db`** (ASE SQLite database): intended for use with ASE (Atomic Simulation Environment), enabling efficient storage of `Atoms` objects, searchable key-value metadata, and reaction mapping.
+2. **`BorylXAT-DB.parquet`** (Parquet dataset): a flattened tabular dataset containing coordinates, atomic numbers, and descriptors, suitable for Pandas, PyArrow, and downstream machine-learning workflows.
 
 ---
 
@@ -25,7 +25,7 @@ All structures are classified into seven categories according to the regex-based
 
 ---
 
-## 1. ASE SQLite Database (`boron_ccl.db`)
+## 1. ASE SQLite Database (`BorylXAT-DB.db`)
 
 In addition to storing ASE `Atoms` objects, the ASE database contains:
 
@@ -107,7 +107,7 @@ In addition to storing ASE `Atoms` objects, the ASE database contains:
 
 ---
 
-## 2. Parquet Dataset (`boron_ccl_dataset.parquet`)
+## 2. Parquet Dataset (`BorylXAT-DB.parquet`)
 
 The Parquet file stores a unified tabular `DataFrame` with the following groups of columns.
 

@@ -22,8 +22,8 @@ According to the manuscript outline, the study targets a reaction space built fr
 
 This combinatorial space is filtered before TS calculation. The current generated database files are:
 
-- `boron_ccl.db`: ASE SQLite database with `50057` structures
-- `boron_ccl_dataset.parquet`: flattened Parquet dataset
+- `BorylXAT-DB.db`: ASE SQLite database with `50057` structures
+- `BorylXAT-DB.parquet`: flattened Parquet dataset
 
 The current ASE database contains:
 
@@ -68,7 +68,7 @@ The main entry points are the notebooks in repository root:
 | --- | --- |
 | `1_Calc_Reactant.ipynb` | Reactant preparation, reaction-site enumeration, xTB conformer sampling, and DFT setup for boranes, Lewis bases, chlorides, and B-LB complexes |
 | `2_Calc_TS.ipynb` | TS guess generation, constrained optimization, TS search, SPE correction, IRC analysis, and TS summary generation |
-| `3_Build_DataBase.ipynb` | Consolidates parsed outputs into `boron_ccl.db` and `boron_ccl_dataset.parquet`; includes reviewer-runnable database inspection and Figure 1 style summary plots |
+| `3_Build_DataBase.ipynb` | Consolidates parsed outputs into `BorylXAT-DB.db` and `BorylXAT-DB.parquet`; includes reviewer-runnable database inspection and Figure 1 style summary plots |
 | `4_Benchmark.ipynb` | DFT method benchmark workflow with separated raw Gaussian-dependent sections and reviewer-runnable result analysis |
 | `5_Modeling.ipynb` | Descriptor generation, precomputed-descriptor loading, CatBoost modeling, validation plots, and OOD analysis |
 | `6_Draw_Figures.ipynb` | Consolidated manuscript/SI figure-generation notebook; collects figure code previously spread across database-building and molecule-drawing workflows |
@@ -83,7 +83,7 @@ The notebooks have been curated for manuscript review, with computational-proven
 | --- | --- | --- |
 | `1_Calc_Reactant.ipynb` | Rewrote outdated markdown notes, tightened comments around reactant enumeration/optimization, removed unused imports, and removed stale working variables. | Documents the production reactant-optimization workflow. A full rerun requires Gaussian, xTB/CREST, and the historical calculation workspace. |
 | `2_Calc_TS.ipynb` | Removed unused imports/variables, moved `complete_target()` into `DFTStructureGenerator/borane_xat_workflow.py`, and moved the target-CSV completion block to the final optional supplement/export section. | Documents TS generation, constrained optimization, TS optimization, SPE, IRC, and summary export. A full rerun requires the original Gaussian/xTB folders. |
-| `3_Build_DataBase.ipynb` | Added review tags that distinguish raw Gaussian parsing from database inspection. Figure-producing logic that belongs to the manuscript figure set is now centralized in `6_Draw_Figures.ipynb`. | Reviewers can inspect the released `boron_ccl.db` and `boron_ccl_dataset.parquet` without rebuilding from raw logs. |
+| `3_Build_DataBase.ipynb` | Added review tags that distinguish raw Gaussian parsing from database inspection. Figure-producing logic that belongs to the manuscript figure set is now centralized in `6_Draw_Figures.ipynb`. | Reviewers can inspect the released `BorylXAT-DB.db` and `BorylXAT-DB.parquet` without rebuilding from raw logs. |
 | `4_Benchmark.ipynb` | Cleaned benchmark comments, grouped setup/method definitions/result analysis, and marked raw structure/input collection separately from checked-in result analysis. | Reviewers can load `Data/csvs/Benchmark_Result.csv` and regenerate the benchmark summary figure without the original Gaussian folders. |
 | `5_Modeling.ipynb` | Polished imports and comments, separated descriptor generation from descriptor loading, marked descriptor generation as optional, and added the missing Figure 6B `plt.savefig(...)` call. | Reviewers can use pre-extracted descriptors from `Data/descriptor/` to skip the expensive descriptor-building stage, then rerun model validation and plotting. |
 | `6_Draw_Figures.ipynb` | Consolidated manuscript/SI figure-generation code from the database-building and molecule-drawing workflows into one notebook. Former Figure 4 labels and output filenames were corrected to Figure 5. | This is the current reviewer-facing entry point for regenerating manuscript and SI figures from checked-in data products. |
@@ -192,8 +192,8 @@ For reviewer-style reuse without the original Gaussian folders, the recommended 
 
 If you only want the final structured dataset, start from the existing files:
 
-- `boron_ccl.db`
-- `boron_ccl_dataset.parquet`
+- `BorylXAT-DB.db`
+- `BorylXAT-DB.parquet`
 - `Data/descriptor/*.pkl`
 
 For programmatic access to the ASE database:
@@ -201,7 +201,7 @@ For programmatic access to the ASE database:
 ```python
 from ase.db import connect
 
-db = connect("boron_ccl.db")
+db = connect("BorylXAT-DB.db")
 ts_rows = list(db.select(category="ts"))
 print(len(ts_rows))
 print(ts_rows[0].key_value_pairs)

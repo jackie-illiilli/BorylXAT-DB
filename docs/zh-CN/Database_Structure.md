@@ -4,8 +4,8 @@
 
 基于 `Build_DataBase.py` 的实现逻辑，数据库构建流程会生成两个核心文件，用于结构化存储量子化学计算得到的三维结构和热力学数据。两种格式面向不同使用场景：
 
-1. **`boron_ccl.db`**：ASE SQLite 数据库，适合通过 ASE 高效存储 `Atoms` 对象、检索键值对元数据并追踪反应映射关系。
-2. **`boron_ccl_dataset.parquet`**：Parquet 数据集，以扁平化二维表的形式存储坐标、原子序数及描述符，更适合 Pandas、PyArrow 和机器学习任务。
+1. **`BorylXAT-DB.db`**：ASE SQLite 数据库，适合通过 ASE 高效存储 `Atoms` 对象、检索键值对元数据并追踪反应映射关系。
+2. **`BorylXAT-DB.parquet`**：Parquet 数据集，以扁平化二维表的形式存储坐标、原子序数及描述符，更适合 Pandas、PyArrow 和机器学习任务。
 
 ---
 
@@ -25,7 +25,7 @@
 
 ---
 
-## 1. ASE SQLite 数据库（`boron_ccl.db`）
+## 1. ASE SQLite 数据库（`BorylXAT-DB.db`）
 
 除了 ASE 原生的 `Atoms` 对象外，数据库还包含：
 
@@ -107,7 +107,7 @@
 
 ---
 
-## 2. Parquet 数据集（`boron_ccl_dataset.parquet`）
+## 2. Parquet 数据集（`BorylXAT-DB.parquet`）
 
 Parquet 文件保存为统一的二维表 `DataFrame`，主要包含以下几类列：
 
