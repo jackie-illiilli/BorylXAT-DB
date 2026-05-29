@@ -1,4 +1,4 @@
-# Borane Radical Catalyzed C-Cl Activation Database Structure
+# BorylXAT-DB Database Structure
 
 [中文版本](docs/zh-CN/Database_Structure.md) | [Project README](README.md)
 
@@ -15,7 +15,7 @@ All structures are classified into seven categories according to the regex-based
 
 | Category | Description | Open/Closed Shell | Special Data |
 | --- | --- | --- | --- |
-| `B` | Borane radical catalyst | Open-shell | Spin density |
+| `B` | Boryl radical component | Open-shell | Spin density |
 | `LB` | Lewis base / nucleophile | Closed-shell | — |
 | `Cl` | Chloride substrate (`Cl_xxxxx_r`) | Closed-shell | — |
 | `complex_r` | Reactant complex (B-LB reactant) | Open-shell | Spin density |

@@ -1,14 +1,14 @@
-# Borane Radical C-Cl Activation Database
+# BorylXAT-DB: a transition-state database for boryl-radical-mediated C–Cl atom transfer
 
 [中文说明](docs/zh-CN/README.md) | [Database Structure](Database_Structure.md) | [数据库结构说明](docs/zh-CN/Database_Structure.md)
 
-This repository contains the workflow used to build, curate, analyze, and model a quantum-chemistry dataset for Lewis base activated borane radical mediated C-Cl bond activation. It is the code companion for the manuscript project on large-scale transition-state data generation, mechanism analysis, and machine-learning assisted reactivity prediction.
+This repository contains the workflow used to build, curate, analyze, and model BorylXAT-DB, a quantum-chemistry dataset for Lewis base-coordinated boryl-radical-mediated C–Cl atom transfer. It is the code companion for the manuscript project on large-scale transition-state data generation, mechanism analysis, and machine-learning assisted reactivity prediction.
 
 Public code repository: <https://github.com/jackie-illiilli/BorylXAT-DB>. Large database files are distributed through Zenodo: <https://doi.org/10.5281/zenodo.20134535>.
 
 The project combines:
 
-- reaction-space enumeration from borane, Lewis base, and chloride substrate libraries
+- reaction-space enumeration from boryl radical, Lewis base, and chlorinated substrate libraries
 - RDKit and xTB based conformer generation
 - Gaussian job generation for ground states, constrained optimizations, TS searches, SPE corrections, and IRC validation
 - structured database construction in ASE SQLite and Parquet formats
@@ -18,7 +18,7 @@ The project combines:
 
 According to the manuscript outline, the study targets a reaction space built from:
 
-- 55 borane radicals
+- 55 boryl radicals
 - 386 Lewis bases in the manuscript description
 - 179 chloride substrates
 
@@ -45,7 +45,7 @@ The manuscript-facing reaction space counts 386 Lewis bases because one standalo
 
 The codebase is built to answer three linked questions:
 
-1. Which borane/Lewis base/substrate combinations are thermodynamically feasible?
+1. Which boryl radical/Lewis base/substrate combinations are thermodynamically feasible?
 2. What are the geometric and energetic characteristics of the validated halogen-atom-transfer transition states?
 3. Can these DFT results be converted into descriptors and predictive ML models for `ΔG‡` and related trends?
 
@@ -99,6 +99,26 @@ The review tags used in notebooks are:
 | `[REVIEWER-RUNNABLE]` | Cells that should run from the checked-in data files without the original HPC/Gaussian working folders |
 | `[RAW-GAUSSIAN/E:/work]` | Provenance or reproduction cells that depend on the historical Gaussian/xTB output tree, especially paths under `E:/work` |
 | `[OPTIONAL-DESCRIPTOR-GENERATION]` | Expensive descriptor-generation cells; the repository includes precomputed descriptor files for faster review |
+
+## Repository Structure
+
+```text
+.
+|-- DFTStructureGenerator/     Reusable Python modules for structure generation, parsing, database building, descriptors, and plotting
+|-- Data/
+|   |-- ChemDraw/              ChemDraw source files for the reactant libraries
+|   |-- csvs/                  Intermediate screening tables before TS calculation, plus reactant SMILES included in the database
+|   |-- descriptor/            Saved descriptor files used by the modeling workflow
+|   `-- TS/                    The 9237 transition-state records and corresponding TS coordinates
+|-- Figure/                    Original manuscript and SI figure outputs
+|-- 1_Calc_Reactant.ipynb      Reactant preparation workflow
+|-- 2_Calc_TS.ipynb            Transition-state generation and validation workflow
+|-- 3_Build_DataBase.ipynb     Database construction and inspection workflow
+|-- 4_Benchmark.ipynb          DFT benchmark workflow
+|-- 5_Modeling.ipynb           Descriptor-based machine-learning workflow
+|-- 6_Draw_Figures.ipynb       Manuscript and SI figure-generation workflow
+`-- Database_Structure.md      Field-level description of the released database
+```
 
 ## Core Package Structure
 
@@ -255,7 +275,7 @@ The full provenance route requires Gaussian, xTB/CREST, a PBS-style HPC environm
 This repository already serves well as:
 
 - a data-packaged computational chemistry project
-- a reproducible record of the borane radical C-Cl activation workflow
+- a reproducible record of the boryl-radical-mediated C–Cl atom-transfer workflow
 - a starting point for mechanism analysis and descriptor-based ML on main-group radical reactions
 
 Potential future cleanup items include expanding `pyproject.toml`, adding a frozen environment file, and exposing the notebook workflow through a small CLI.

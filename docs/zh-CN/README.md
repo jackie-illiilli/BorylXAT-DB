@@ -1,8 +1,8 @@
-# 硼自由基 C-Cl 活化数据库
+# BorylXAT-DB: a transition-state database for boryl-radical-mediated C–Cl atom transfer
 
 [English README](../../README.md) | [English Database Structure](../../Database_Structure.md) | [数据库结构说明](Database_Structure.md)
 
-本仓库是硼自由基在路易斯碱活化下进行 C-Cl 键活化研究的数据生产、整理、分析与建模代码库，也是对应论文项目的配套仓库。项目目标是通过高通量量子化学计算构建过渡态数据库，并进一步开展机理分析与机器学习预测。
+本仓库是 BorylXAT-DB 的数据生产、整理、分析与建模代码库，面向路易斯碱配位硼自由基介导的 C–Cl 原子转移反应，也是对应论文项目的配套仓库。项目目标是通过高通量量子化学计算构建过渡态数据库，并进一步开展机理分析与机器学习预测。
 
 本项目主要包含以下几部分：
 
@@ -97,6 +97,26 @@ Notebook 中使用的标记含义如下：
 | `[REVIEWER-RUNNABLE]` | 基于仓库中已提交的数据文件即可运行的审稿分析单元 |
 | `[RAW-GAUSSIAN/E:/work]` | 依赖历史 Gaussian/xTB 输出目录的来源追溯或完整复现单元，尤其是 `E:/work` 路径 |
 | `[OPTIONAL-DESCRIPTOR-GENERATION]` | 计算量较大的描述符生成单元；仓库已提供预计算描述符文件，便于快速审稿 |
+
+## 代码与数据结构
+
+```text
+.
+|-- DFTStructureGenerator/     结构生成、Gaussian 解析、数据库构建、描述符和绘图等可复用 Python 模块
+|-- Data/
+|   |-- ChemDraw/              反应物库对应的 ChemDraw 源文件
+|   |-- csvs/                  从筛选流程到过渡态计算前的中间表格，以及数据库包含的反应物 SMILES 数据
+|   |-- descriptor/            已保存的描述符文件，供建模流程直接读取
+|   `-- TS/                    9237 个过渡态记录及对应的过渡态坐标
+|-- Figure/                    文章和 SI 涉及图片的原始导出版本
+|-- 1_Calc_Reactant.ipynb      反应物准备流程
+|-- 2_Calc_TS.ipynb            过渡态生成与验证流程
+|-- 3_Build_DataBase.ipynb     数据库构建与检查流程
+|-- 4_Benchmark.ipynb          DFT 方法 benchmark 流程
+|-- 5_Modeling.ipynb           描述符和机器学习建模流程
+|-- 6_Draw_Figures.ipynb       论文与 SI 作图流程
+`-- Database_Structure.md      发布数据库的字段说明
+```
 
 ## 核心代码结构
 

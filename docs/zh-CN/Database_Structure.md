@@ -1,4 +1,4 @@
-# 硼自由基催化 C-Cl 活化反应数据库结构
+# BorylXAT-DB 数据库结构
 
 [English Version](../../Database_Structure.md) | [项目 README](README.md)
 

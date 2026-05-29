@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: "If you use BorylXAT-DB, please cite the dataset DOI and the associated manuscript."
-title: "BorylXAT-DB: A DFT transition-state database for Lewis base activated boryl-radical C-Cl activation"
+title: "BorylXAT-DB: an IRC-validated transition-state database for boryl-radical-mediated C–Cl atom transfer"
 type: dataset
 version: 1.0.0
 date-released: 2026-05-04
@@ -12,7 +12,7 @@ authors:
   - name: "BorylXAT-DB contributors"
 preferred-citation:
   type: article
-  title: "BorylXAT-DB: A large-scale transition-state database for Lewis base activated boryl-radical C-Cl activation"
+  title: "BorylXAT-DB: an IRC-validated transition-state database for boryl-radical-mediated C–Cl atom transfer"
   authors:
     - name: "BorylXAT-DB contributors"
   year: 2026
