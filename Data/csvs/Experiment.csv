@@ -1,0 +1,9 @@
+B_smiles,B_Index,B_Atomid,N_smiles,N_Index,N_Atomid,Cl_smiles,Cl_Index,Cl_Atomid,kq
+B,388,0,CN(C)c1ccncc1,234,6,O=C(Nc1ccc(F)cc1)C(Cl)(Cl)Cl,723,11,3.90E+08
+B,388,0,CN(C)c1ccncc1,234,6,O=C(Nc1ccc(F)cc1)C(Cl)Cl,724,11,3.70E+07
+B,388,0,CN1[C]N(C)C=C1,146,2,O=C(Nc1ccc(F)cc1)C(Cl)(Cl)Cl,723,11,2.50E+08
+B,388,0,CN1[C]N(C)C=C1,146,2,O=C(Nc1ccc(F)cc1)C(Cl)Cl,724,11,4.20E+07
+BC#N,389,0,CN(C)c1ccncc1,234,6,O=C(Nc1ccc(F)cc1)C(Cl)(Cl)Cl,723,11,2.90E+08
+BC#N,389,0,CN(C)c1ccncc1,234,6,O=C(Nc1ccc(F)cc1)C(Cl)Cl,724,11,1.30E+07
+BC#N,389,0,CN1[C]N(C)C=C1,146,2,O=C(Nc1ccc(F)cc1)C(Cl)(Cl)Cl,723,11,8.40E+06
+BC#N,389,0,CN1[C]N(C)C=C1,146,2,O=C(Nc1ccc(F)cc1)C(Cl)Cl,724,11,2.10E+05

@@ -1,0 +1,7 @@
+metric,flag,group,n,mean,median,p95,max,high_n,high_frac
+s2_before_annihilation,bep_outlier_2sigma,False,8792,0.7643082347588717,0.7643,0.7721449999999999,0.8248,8,0.0009099181073703367
+s2_before_annihilation,bep_outlier_2sigma,True,445,0.7635712359550563,0.7622,0.77526,0.8323,8,0.017977528089887642
+reactant_bn_s2_before_annihilation,bep_outlier_2sigma,False,8792,0.7648326660600545,0.7649,0.7797,0.8096,42,0.004777070063694267
+reactant_bn_s2_before_annihilation,bep_outlier_2sigma,True,445,0.764650786516854,0.7645,0.7788,0.8055,1,0.0022471910112359553
+max_ts_reactant_s2_before_annihilation,bep_outlier_2sigma,False,8792,0.7676406733393994,0.7671,0.7797,0.8248,50,0.005686988171064604
+max_ts_reactant_s2_before_annihilation,bep_outlier_2sigma,True,445,0.7671932584269663,0.767,0.78288,0.8323,9,0.020224719101123594

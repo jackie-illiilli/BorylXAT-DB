@@ -1,0 +1,11 @@
+question,metric,value,unit
+1,mean_per_reaction_component_fraction,0.43068572128770627,fraction
+1,ratio_of_duplicated_component_sums,0.42834097636728347,fraction
+1,mean_TS_opt_SPE,0.8104030890260184,h_per_TS
+2,deduplicated_component_fraction_9237,0.23731570010706057,fraction
+2,deduplicated_component_total,2329.2370833333334,wall_h_equivalent
+3,full_reaction_count,3581790.0,reactions
+3,full_unique_component_fraction,0.004436098313173791,fraction
+3,full_unique_component_total,12934.011083333335,wall_h_equivalent
+3,projected_full_space_TS_total,2902693.6802425026,wall_h_equivalent
+3,projected_TS_to_component_factor,224.4233178354773,fold

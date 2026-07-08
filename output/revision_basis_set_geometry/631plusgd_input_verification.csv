@@ -1,0 +1,16 @@
+name,basis_is_631plusgd,atom_order_matches,coordinates_match,charge_matches,multiplicity_matches,all_checks_pass
+B_00388_L_00001_Cl_00475,True,True,True,True,True,True
+B_00388_L_00001_Cl_00477,True,True,True,True,True,True
+B_00388_L_00001_Cl_00490,True,True,True,True,True,True
+B_00388_L_00001_Cl_00506,True,True,True,True,True,True
+B_00388_L_00001_Cl_00519,True,True,True,True,True,True
+B_00388_L_00069_Cl_00490,True,True,True,True,True,True
+B_00388_L_00072_Cl_00490,True,True,True,True,True,True
+B_00388_L_00072_Cl_00519,True,True,True,True,True,True
+B_00391_L_00033_Cl_00477,True,True,True,True,True,True
+B_00391_L_00033_Cl_00519,True,True,True,True,True,True
+B_00391_L_00069_Cl_00519,True,True,True,True,True,True
+B_00394_L_00046_Cl_00519,True,True,True,True,True,True
+B_00401_L_00146_Cl_00443,True,True,True,True,True,True
+B_00427_L_00046_Cl_00519,True,True,True,True,True,True
+B_00427_L_00072_Cl_00477,True,True,True,True,True,True
