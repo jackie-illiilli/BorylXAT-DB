@@ -10,6 +10,7 @@ from morfeus import BuriedVolume
 from tqdm import tqdm
 
 from . import Tool, mol_manipulation
+from .thermochemistry import apply_qharm_component_energies
 
 
 DUPLICATE_N_IDS = [
@@ -165,37 +166,76 @@ def build_descriptor_maps(
     cl_csv_path="data/csvs/reactants_Cl.csv",
     duplicate_cl_ids=None,
     show_progress=True,
+    use_qharm=False,
+    load_bn_cl_map = [],
 ):
+    """Build DFT descriptor maps with selectable component thermochemistry.
+
+    When ``use_qharm`` is true, descriptor entry zero is computed from the
+    QHARM Gibbs energies in ``db_path`` rather than the RRHO values stored in
+    the reactant CSV tables.  All electronic and geometric entries are
+    unchanged.
+    """
     if duplicate_cl_ids is None:
         duplicate_cl_ids = DUPLICATE_CL_IDS
 
     db = connect(db_path)
     bn_csv = pd.read_csv(bn_csv_path)
     cl_csv = pd.read_csv(cl_csv_path)
+    if len(load_bn_cl_map):
+        bn_map, cl_map = load_descriptor_maps(
+        bn_path=load_bn_cl_map[0],
+        cl_path=load_bn_cl_map[1],
+        )
+    else:
+        bn_map = {}
+        bn_iter = bn_csv.iterrows()
+        cl_iter = cl_csv.iterrows()
+        if show_progress:
+            bn_iter = tqdm(bn_iter, total=len(bn_csv))
+            cl_iter = tqdm(cl_iter, total=len(cl_csv))
 
-    bn_map = {}
-    bn_iter = bn_csv.iterrows()
-    cl_iter = cl_csv.iterrows()
-    if show_progress:
-        bn_iter = tqdm(bn_iter, total=len(bn_csv))
-        cl_iter = tqdm(cl_iter, total=len(cl_csv))
+        for _, row in bn_iter:
+            bn_name, descriptor = _build_bn_descriptor(row, db)
+            if bn_name not in bn_map:
+                bn_map[bn_name] = descriptor
 
-    for _, row in bn_iter:
-        bn_name, descriptor = _build_bn_descriptor(row, db)
-        if bn_name not in bn_map:
-            bn_map[bn_name] = descriptor
+        cl_map = {}
+        for _, row in cl_iter:
+            try:
+                cl_name, descriptor = _build_cl_descriptor(row, db, duplicate_cl_ids)
+                cl_map[cl_name] = descriptor
+            except Exception as e:
+                print(f"Error building descriptor for Cl_{row['Index']:05}: {e}")
 
-    cl_map = {}
-    for _, row in cl_iter:
-        cl_name, descriptor = _build_cl_descriptor(row, db, duplicate_cl_ids)
-        cl_map[cl_name] = descriptor
-
+    if use_qharm:
+        bn_map, cl_map = apply_qharm_component_energies(
+            bn_map,
+            cl_map,
+            use_qharm=True,
+            db_path=db_path,
+        )
     return bn_map, cl_map
 
 
-def dataframe_to_descriptors(data_csv, bn_map, cl_map, duplicate_cl_ids=None, show_progress=True):
+def dataframe_to_descriptors(
+    data_csv,
+    bn_map,
+    cl_map,
+    duplicate_cl_ids=None,
+    show_progress=True,
+    reaction_energy_column=None,
+):
+    """Combine component maps into reaction descriptors.
+
+    ``reaction_energy_column`` can explicitly supply the selected reaction
+    free energy in kcal/mol.  This is the preferred QHARM path; leaving it as
+    ``None`` preserves the historical component-map calculation.
+    """
     if duplicate_cl_ids is None:
         duplicate_cl_ids = DUPLICATE_CL_IDS
+    if reaction_energy_column is not None and reaction_energy_column not in data_csv.columns:
+        raise KeyError(f"Reaction-energy column not found: {reaction_energy_column}")
 
     rows = data_csv.iterrows()
     if show_progress:
@@ -206,7 +246,10 @@ def dataframe_to_descriptors(data_csv, bn_map, cl_map, duplicate_cl_ids=None, sh
         b_index = int(row["B_Index"])
         n_index = int(row["N_Index"])
         cl_index = int(row["Cl_Index"])
-        cl_atomid = int(row["Cl_Atomid"])
+        try:
+            cl_atomid = int(row["Cl_Atomid"])
+        except:
+            cl_atomid = None
 
         b_n_name = f"B_{b_index:05}_Nu_{n_index:05}"
         cl_name = f"Cl_{cl_index:05}"
@@ -215,7 +258,10 @@ def dataframe_to_descriptors(data_csv, bn_map, cl_map, duplicate_cl_ids=None, sh
 
         des_a = bn_map[b_n_name]
         des_b = cl_map[cl_name]
-        delta_g = [(des_a[0] + des_b[0]) * 627.5]
+        if reaction_energy_column is None:
+            delta_g = [(des_a[0] + des_b[0]) * 627.5]
+        else:
+            delta_g = [float(row[reaction_energy_column])]
         all_xs.append(delta_g + des_a[1:] + des_b[1:])
 
     return np.asarray(all_xs, dtype=float)

@@ -1,8 +1,0 @@
-search_space,root,depth,scanned_files,identifier_like_files,full_identifier_like_files,component_identifier_like_files,matched_files
-Sum/*,E:\work\B_Cl_Nu\Sum,1,96208,96208,85552,10656,918
-Sum/*/*,E:\work\B_Cl_Nu\Sum,2,19723,19723,19549,174,137
-Data/first_10000/*,E:\work\B_Cl_Nu\Data\first_10000,1,151781,151680,141680,10000,9967
-Y backup Sum/*,Y:\cold-data\数据备份\B_Cl_Nu\Sum,1,99975,99975,98964,1011,910
-Y backup Sum/*/*,Y:\cold-data\数据备份\B_Cl_Nu\Sum,2,2725,2525,2507,18,134
-Y backup Data/*,Y:\cold-data\数据备份\B_Cl_Nu\Data,1,25,3,2,1,0
-Y backup Data/*/*,Y:\cold-data\数据备份\B_Cl_Nu\Data,2,138730,138376,122094,16282,3830

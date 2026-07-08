@@ -1,0 +1,20 @@
+# Core reviewer-runnable Python stack for BorylXAT-DB
+ase==3.23.0
+catboost==1.2.7
+ipykernel>=6.29
+jupyterlab>=4.2
+matplotlib>=3.8
+morfeus-ml==0.7.2
+numpy>=1.26,<2
+openpyxl>=3.1
+pandas>=2.2,<2.4
+pyarrow>=16
+rdkit==2024.3.3
+scikit-learn>=1.5,<1.8
+scipy>=1.13
+seaborn>=0.13
+tqdm>=4.66
+
+# Optional but recommended for revision notebooks that benchmark
+# additional model families beyond the main CatBoost workflow.
+xgboost>=2.1,<3

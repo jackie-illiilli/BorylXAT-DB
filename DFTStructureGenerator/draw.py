@@ -205,6 +205,7 @@ def plot_bep_single_type(
     save_path,
     title=None,
     top_n=3,
+    show=True,
 ):
     x_col = "deltaG(kcal/mol)"
     y_col = "deltaGa(kcal/mol)"
@@ -291,7 +292,10 @@ def plot_bep_single_type(
     if save_dir:
         os.makedirs(save_dir, exist_ok=True)
     plt.savefig(save_path, dpi=300, bbox_inches="tight")
-    plt.show()
+    if show:
+        plt.show()
+    else:
+        plt.close(fig)
     return fit_row, deviation_df
 
 
@@ -303,6 +307,7 @@ def plot_bep_by_type(
     save_path,
     title=None,
     top_n=3,
+    show=True,
 ):
     type_order = observed_type_order(df[type_column], type_order)
     color_map = {type_name: colors[i % len(colors)] for i, type_name in enumerate(type_order)}
@@ -322,6 +327,7 @@ def plot_bep_by_type(
             save_path=type_save_path,
             title=title,
             top_n=top_n,
+            show=show,
         )
         if fit_row is not None:
             fit_rows.append(fit_row)
@@ -468,7 +474,15 @@ def draw_correlation_map(
     if target is not None:
         target_series = pd.Series(target, index=df.index)
         target_correlations = np.abs(df.corrwith(target_series))
-        np.fill_diagonal(correlation_matrix.values, target_correlations.to_numpy())
+        # pandas may expose a read-only NumPy view (notably with Copy-on-Write),
+        # so mutate an explicit writable copy and rebuild the DataFrame.
+        correlation_values = correlation_matrix.to_numpy(copy=True)
+        np.fill_diagonal(correlation_values, target_correlations.to_numpy())
+        correlation_matrix = pd.DataFrame(
+            correlation_values,
+            index=correlation_matrix.index,
+            columns=correlation_matrix.columns,
+        )
     mask = np.triu(np.ones_like(correlation_matrix, dtype=bool))
     if target is not None:
         np.fill_diagonal(mask, False)

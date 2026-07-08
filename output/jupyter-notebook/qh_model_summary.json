@@ -1,7 +1,0 @@
-{
-  "n": 9237,
-  "model_iterations": 10000,
-  "random_state": 0,
-  "metrics_csv": "output\\jupyter-notebook\\qh_model_cv_metrics.csv",
-  "predictions_csv": "output\\jupyter-notebook\\qh_model_cv_predictions.csv"
-}

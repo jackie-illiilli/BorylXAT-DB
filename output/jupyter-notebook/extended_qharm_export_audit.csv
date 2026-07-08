@@ -1,0 +1,2 @@
+input_csv,rows,successful_ts_qharm,failed_ts_qharm,temperature_K,frequency_cutoff_cm_1,mean_barrier_shift_kcal_mol,mean_reaction_shift_kcal_mol
+D:\OneDrive_all\OneDrive\Work\work_part\22.Borane_Radical_Database\Data\TS\result_filter_extended.csv,946,946,0,298.15,100.0,-4.299273875260811,-2.48458266539523

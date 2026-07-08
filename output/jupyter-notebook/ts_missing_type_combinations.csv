@@ -1,0 +1,32 @@
+B_type,LB_type,Cl_type,count
+R2BH,Phosphine,CCl,591
+R2BH,Amine/Aryl N,CCl,398
+RBH2,Amine/Aryl N,CCl,338
+R2BH,NHC,CCl,244
+RBH2,Phosphine,CCl,205
+RBH2,NHC,CCl,186
+BH3,Amine/Aryl N,CCl,120
+R2BH,Amine/Aryl N,CCl2,113
+BH3,Amine/Aryl N,CCl2,111
+R2BH,Phosphine,CCl2,105
+R2BH,Phosphine,CCl3,91
+RBH2,Amine/Aryl N,CCl2,82
+RBH2,Amine/Aryl N,CCl3,73
+R2BH,Amine/Aryl N,CCl3,64
+R2BH,NHC,CCl3,58
+BH3,Amine/Aryl N,CCl3,47
+R2BH,NHC,CCl2,27
+RBH2,Phosphine,CCl2,26
+RBH2,NHC,CCl3,25
+BH3,Phosphine,CCl,21
+BH3,Phosphine,CCl3,18
+RBH2,NHC,CCl2,17
+RBH2,Phosphine,CCl3,15
+BH3,NHC,CCl,13
+BH3,Phosphine,CCl2,9
+RBH2,Amine/Aryl N,CCl4,8
+R2BH,Amine/Aryl N,CCl4,5
+BH3,NHC,CCl2,4
+BH3,Amine/Aryl N,CCl4,3
+R2BH,NHC,CCl4,2
+RBH2,NHC,CCl4,1

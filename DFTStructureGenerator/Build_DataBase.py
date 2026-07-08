@@ -176,7 +176,7 @@ def add_reactant_type_columns(ts_df, db_or_path=OUTPUT_ASE_DB):
 
 
 def build_ts_type_distribution_dataframe(db_or_path=OUTPUT_ASE_DB):
-    """Build the TS dataframe used by the 9237 TS type-distribution plot."""
+    """Build the TS dataframe used by the 8980 TS type-distribution plot."""
     db = _as_db(db_or_path)
     ts_df = pd.DataFrame([
         {

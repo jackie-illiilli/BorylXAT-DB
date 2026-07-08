@@ -1,14 +1,28 @@
 [project]
 name = "22-borane-radical-database"
 version = "0.1.0"
-description = "Add your description here"
+description = "Workflow, released data interfaces, and reviewer-runnable notebooks for BorylXAT-DB."
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "ase==3.23.0",
     "catboost==1.2.7",
-    "ipykernel>=7.2.0",
+    "ipykernel>=6.29",
+    "jupyterlab>=4.2",
+    "matplotlib>=3.8",
     "morfeus-ml==0.7.2",
+    "numpy>=1.26,<2",
+    "openpyxl>=3.1",
+    "pandas>=2.2,<2.4",
+    "pyarrow>=16",
     "rdkit==2024.3.3",
-    "tqdm",
+    "scikit-learn>=1.5,<1.8",
+    "scipy>=1.13",
+    "seaborn>=0.13",
+    "tqdm>=4.66",
+]
+
+[project.optional-dependencies]
+revision = [
+    "xgboost>=2.1,<3",
 ]

@@ -1,33 +1,36 @@
-# BorylXAT-DB: a transition-state database for boryl-radical-mediated C–Cl atom transfer
+# BorylXAT-DB: a transition-state database for boryl-radical-mediated C-Cl atom transfer
 
 [中文说明](docs/zh-CN/README.md) | [Database Structure](Database_Structure.md) | [数据库结构说明](docs/zh-CN/Database_Structure.md)
 
-This repository contains the workflow used to build, curate, analyze, and model BorylXAT-DB, a quantum-chemistry dataset for Lewis base-coordinated boryl-radical-mediated C–Cl atom transfer. It is the code companion for the manuscript project on large-scale transition-state data generation, mechanism analysis, and machine-learning assisted reactivity prediction.
+This repository contains the workflow, released data interfaces, and analysis notebooks for **BorylXAT-DB**, a quantum-chemistry dataset for Lewis-base-coordinated boryl-radical-mediated C-Cl atom transfer.
 
-Public code repository: <https://github.com/jackie-illiilli/BorylXAT-DB>. Large database files are distributed through Zenodo: <https://doi.org/10.5281/zenodo.20134535>.
+Public code repository: <https://github.com/jackie-illiilli/BorylXAT-DB>  
+Zenodo archive for large files and released databases: <https://doi.org/10.5281/zenodo.20134535>
+
+## What This Repository Covers
 
 The project combines:
 
-- reaction-space enumeration from boryl radical, Lewis base, and chlorinated substrate libraries
+- reaction-space enumeration from borane radical, Lewis base, and chlorinated substrate libraries
 - RDKit and xTB based conformer generation
-- Gaussian job generation for ground states, constrained optimizations, TS searches, SPE corrections, and IRC validation
+- Gaussian job generation for ground states, constrained optimizations, transition-state searches, single-point corrections, and IRC validation
 - structured database construction in ASE SQLite and Parquet formats
-- descriptor extraction, statistical analysis, benchmarking, and ML modeling
+- descriptor extraction, benchmark analysis, BEP analysis, and machine-learning modeling
+- reviewer-runnable notebooks for the main paper and revision analyses
 
-## Project Scope
+The manuscript-facing designed space contains:
 
-According to the manuscript outline, the study targets a reaction space built from:
+- `55` borane radicals
+- `386` Lewis bases in the manuscript count
+- `179` chlorinated substrates
 
-- 55 boryl radicals
-- 386 Lewis bases in the manuscript description
-- 179 chloride substrates
+The released structural database currently contains:
 
-This combinatorial space is filtered before TS calculation. The current generated database files are:
+- `BorylXAT-DB.db`: ASE SQLite database
+- `BorylXAT-DB.parquet`: flattened Parquet export
+- `BorylXAT-DB_qh_update.db`: quasi-harmonic thermochemistry update database used by the QHARM revision notebooks
 
-- `BorylXAT-DB.db`: ASE SQLite database with `50057` structures
-- `BorylXAT-DB.parquet`: flattened Parquet dataset
-
-The current ASE database contains:
+The ASE database categories are:
 
 | Category | Count |
 | --- | ---: |
@@ -37,188 +40,92 @@ The current ASE database contains:
 | `complex_r` | 20010 |
 | `complex_p` | 20010 |
 | `c_radical` | 179 |
-| `ts` | 9237 |
+| `ts` | 8980 |
 
-The manuscript-facing reaction space counts 386 Lewis bases because one standalone Lewis base entry (`LB_00623`) does not form thermodynamically stable B-LB complexes with any borane radical. The database intentionally retains this molecule in the `LB` category for provenance, but it does not appear in the filtered B-LB complex set or TS reaction entries.
+The standalone `LB` count is `387` in the database because `LB_00623` is retained for provenance even though it does not survive the manuscript filtering into stable B-LB complexes or TS entries.
 
-## Scientific Goal
+## Dependency Files
 
-The codebase is built to answer three linked questions:
+To address reproducibility for reviewers and readers, the repository now includes three machine-readable dependency definitions:
 
-1. Which boryl radical/Lewis base/substrate combinations are thermodynamically feasible?
-2. What are the geometric and energetic characteristics of the validated halogen-atom-transfer transition states?
-3. Can these DFT results be converted into descriptors and predictive ML models for `ΔG‡` and related trends?
+- `pyproject.toml`: package metadata plus the core Python stack for the reusable modules and notebooks
+- `requirements.txt`: pip-style environment for reviewer-runnable notebook analysis
+- `environment.yml`: conda environment, recommended when installing `rdkit`
 
-## Workflow Overview
+The Python packages used by the public workflows are:
 
-The practical workflow in this repository is notebook driven:
-
-1. Enumerate reactants and reaction sites from curated reactant tables.
-2. Generate initial 3D structures with RDKit and optimize conformers with xTB/CREST.
-3. Build ground-state borane, Lewis base, chloride, and borane-Lewis base complex structures.
-4. Generate TS guesses by combining product-like B-LB-Cl geometries with chloride reactants.
-5. Run constrained optimization, TS optimization, SPE correction, and IRC validation.
-6. Parse Gaussian outputs and collect energies, charges, spin densities, and geometries.
-7. Assemble the final ASE/Parquet databases.
-8. Build descriptors, benchmark methods, and train ML models.
-
-## Notebook Guide
-
-The main entry points are the notebooks in repository root:
-
-| Notebook | Role |
-| --- | --- |
-| `1_Calc_Reactant.ipynb` | Reactant preparation, reaction-site enumeration, xTB conformer sampling, and DFT setup for boranes, Lewis bases, chlorides, and B-LB complexes |
-| `2_Calc_TS.ipynb` | TS guess generation, constrained optimization, TS search, SPE correction, IRC analysis, and TS summary generation |
-| `3_Build_DataBase.ipynb` | Consolidates parsed outputs into `BorylXAT-DB.db` and `BorylXAT-DB.parquet`; includes reviewer-runnable database inspection and Figure 1 style summary plots |
-| `4_Benchmark.ipynb` | DFT method benchmark workflow with separated raw Gaussian-dependent sections and reviewer-runnable result analysis |
-| `5_Modeling.ipynb` | Descriptor generation, precomputed-descriptor loading, CatBoost modeling, validation plots, and OOD analysis |
-| `6_Draw_Figures.ipynb` | Consolidated manuscript/SI figure-generation notebook; collects figure code previously spread across database-building and molecule-drawing workflows |
-
-`main.py` is only a placeholder; the real workflow lives in the notebooks and the `DFTStructureGenerator` package.
-
-## Notebook Curation and Review Readiness
-
-The notebooks have been curated for manuscript review, with computational-provenance cells kept visible and reviewer-runnable analysis separated where possible.
-
-| Notebook | Curation performed | Reviewer usability |
-| --- | --- | --- |
-| `1_Calc_Reactant.ipynb` | Rewrote outdated markdown notes, tightened comments around reactant enumeration/optimization, removed unused imports, and removed stale working variables. | Documents the production reactant-optimization workflow. A full rerun requires Gaussian, xTB/CREST, and the historical calculation workspace. |
-| `2_Calc_TS.ipynb` | Removed unused imports/variables, moved `complete_target()` into `DFTStructureGenerator/borane_xat_workflow.py`, and moved the target-CSV completion block to the final optional supplement/export section. | Documents TS generation, constrained optimization, TS optimization, SPE, IRC, and summary export. A full rerun requires the original Gaussian/xTB folders. |
-| `3_Build_DataBase.ipynb` | Added review tags that distinguish raw Gaussian parsing from database inspection. Figure-producing logic that belongs to the manuscript figure set is now centralized in `6_Draw_Figures.ipynb`. | Reviewers can inspect the released `BorylXAT-DB.db` and `BorylXAT-DB.parquet` without rebuilding from raw logs. |
-| `4_Benchmark.ipynb` | Cleaned benchmark comments, grouped setup/method definitions/result analysis, and marked raw structure/input collection separately from checked-in result analysis. | Reviewers can load `Data/csvs/Benchmark_Result.csv` and regenerate the benchmark summary figure without the original Gaussian folders. |
-| `5_Modeling.ipynb` | Polished imports and comments, separated descriptor generation from descriptor loading, marked descriptor generation as optional, and added the missing Figure 6B `plt.savefig(...)` call. | Reviewers can use pre-extracted descriptors from `Data/descriptor/` to skip the expensive descriptor-building stage, then rerun model validation and plotting. |
-| `6_Draw_Figures.ipynb` | Consolidated manuscript/SI figure-generation code from the database-building and molecule-drawing workflows into one notebook. Former Figure 4 labels and output filenames were corrected to Figure 5. | This is the current reviewer-facing entry point for regenerating manuscript and SI figures from checked-in data products. |
-
-The historical module name `B_N_Cl` is better represented as `borane_xat_workflow`: the workflow now covers borane radical, Lewis-base complex, chloride substrate, XAT transition-state generation, summary export, and reaction annotation rather than a static B/N/Cl data container.
-
-The review tags used in notebooks are:
-
-| Tag | Meaning |
-| --- | --- |
-| `[REVIEWER-RUNNABLE]` | Cells that should run from the checked-in data files without the original HPC/Gaussian working folders |
-| `[RAW-GAUSSIAN/E:/work]` | Provenance or reproduction cells that depend on the historical Gaussian/xTB output tree, especially paths under `E:/work` |
-| `[OPTIONAL-DESCRIPTOR-GENERATION]` | Expensive descriptor-generation cells; the repository includes precomputed descriptor files for faster review |
-
-## Repository Structure
-
-```text
-.
-|-- DFTStructureGenerator/     Reusable Python modules for structure generation, parsing, database building, descriptors, and plotting
-|-- Data/
-|   |-- ChemDraw/              ChemDraw source files for the reactant libraries
-|   |-- csvs/                  Intermediate screening tables before TS calculation, plus reactant SMILES included in the database
-|   |-- descriptor/            Saved descriptor files used by the modeling workflow
-|   `-- TS/                    The 9237 transition-state records and corresponding TS coordinates
-|-- Figure/                    Original manuscript and SI figure outputs
-|-- 1_Calc_Reactant.ipynb      Reactant preparation workflow
-|-- 2_Calc_TS.ipynb            Transition-state generation and validation workflow
-|-- 3_Build_DataBase.ipynb     Database construction and inspection workflow
-|-- 4_Benchmark.ipynb          DFT benchmark workflow
-|-- 5_Modeling.ipynb           Descriptor-based machine-learning workflow
-|-- 6_Draw_Figures.ipynb       Manuscript and SI figure-generation workflow
-`-- Database_Structure.md      Field-level description of the released database
-```
-
-## Core Package Structure
-
-`DFTStructureGenerator/` contains the reusable workflow code:
-
-- `borane_xat_workflow.py`: reaction-site detection, reactant combination generation, DFT job preparation, TS structure generation, IRC job handling, TS summary export, and reaction AAM SMILES annotation
-- `Build_DataBase.py`: converts parsed structure dictionaries into ASE and Parquet databases, and computes `ΔG‡` / `ΔG_rxn`
-- `descriptor.py`: builds borane-Lewis base and chloride descriptor maps and converts reaction tables into ML-ready feature matrices
-- `logfile_process.py`: Gaussian log parser for energies, structures, imaginary frequencies, IRC trajectories, charge/multiplicity, and failure handling
-- `xtb_process.py`: xTB/CREST conformer workflow and PBS script generation
-- `mol_manipulation.py`: geometry transforms, TS/IRC input generation, and Gaussian error-recovery helpers
-- `FormatConverter.py`: converts between RDKit molecules, XYZ, Gaussian input, and charge tables
-- `draw.py`: plotting utilities for scatter plots, distributions, metrics, and correlation maps
-- `Tool.py`: small geometry and utility helpers
-
-## Key Data Products
-
-Besides the main database files, the repository already includes several useful intermediate products:
-
-- `Data/csvs/reactants_B.csv`: borane entries (`55`)
-- `Data/csvs/reactants_N.csv`: Lewis base entries and reaction sites (`415` rows before final filtering/merging)
-- `Data/csvs/reactants_Cl.csv`: chloride substrate entries (`179`)
-- `Data/csvs/reactants_B_N.csv`: filtered borane-Lewis base combinations (`20010`)
-- `Data/csvs/reactants_B_N_full.csv`: larger combination table before the final subset (`22825`)
-- `Data/csvs/Benchmark_Result.csv`: benchmark comparison table
-- `Data/descriptor/*.pkl`: serialized descriptor maps used by the modeling notebook
-- `Figure/`: manuscript and SI figures exported from the analysis notebooks
-
-Database field details are described in [Database_Structure.md](Database_Structure.md). A Chinese version is available at [docs/zh-CN/Database_Structure.md](docs/zh-CN/Database_Structure.md).
-
-## Figure Outputs
-
-The consolidated figure notebook `6_Draw_Figures.ipynb` is the current entry point for manuscript and SI figure export. During cleanup, the former Figure 4 labels and filenames in this workflow were updated to Figure 5. The checked-in and notebook-generated outputs include:
-
-- Figure 1 and Figure 3 summary plots in `Figure/`
-- Figure 5 files: `Figure5_reaction_landscape.png`, `Figure5A_TS_type_distribution.png`, `Figure5B_BCl_BDE_by_B_type.png`, `Figure5B_BCl_BDFE_by_LB_type.png`, `Figure5B_CCl_BDFE_by_hybridization.png`, `Figure5C_BEP_residual.png`, and `Figure5D_TS_geometry.png`
-- Benchmark output: `FigureS17_Benchmark_MAE_R2_combined.png`
-- Modeling outputs exported when `5_Modeling.ipynb` is rerun: `Figure6B_model_validation.png`, `Figure6C_model_feature_importance.png`, and `FigureS21_descriptor_correlation_map.png`
-- SI molecule grids and distribution plots under `Figure/FigureInSI/`
-
-The figure-cleanup pass also renamed the generated Figure 4 image outputs to Figure 5 names, so the current `Figure/` directory matches the manuscript numbering used by `6_Draw_Figures.ipynb`.
-
-## Electronic Structure Setup
-
-From the current notebooks, the main Gaussian settings are:
-
-- geometry optimization and frequencies: `B3LYP/6-31G(d) + D3BJ + SMD(toluene)`
-- single-point correction: `wB97X-D/6-311+G(d,p) + SMD(toluene)`
-- TS workflow: constrained optimization -> TS optimization -> IRC verification
-
-The code also distinguishes open-shell and closed-shell species through spin multiplicity settings, and can export wavefunction-enabled SPE jobs for downstream charge analysis.
-
-## Environment Requirements
-
-The checked-in `pyproject.toml` is minimal and does not yet list the full scientific stack. Based on the current code, a working environment should include at least:
-
-- Python 3.12+
-- `numpy`, `pandas`, `scipy`, `matplotlib`, `tqdm`
-- `rdkit`
 - `ase`
 - `catboost`
-- `scikit-learn`
-- `seaborn`
-- `morfeus`
 - `ipykernel`
-- `openpyxl` and `pyarrow` for Excel/Parquet workflows
+- `jupyterlab`
+- `matplotlib`
+- `morfeus-ml`
+- `numpy`
+- `openpyxl`
+- `pandas`
+- `pyarrow`
+- `rdkit`
+- `scikit-learn`
+- `scipy`
+- `seaborn`
+- `tqdm`
+- `xgboost` for some revision baseline notebooks
 
-External software expected by the workflow:
+External software expected only for full raw-calculation reruns:
 
 - Gaussian
 - xTB / CREST
-- a PBS-style HPC environment for the generated batch scripts
+- a PBS-style HPC environment for generated batch scripts
 
-## Typical Usage
+## Environment Setup
 
-If you want to rerun the full pipeline, the intended order is:
+### Option 1: pip / venv
 
-```text
-1_Calc_Reactant.ipynb
-2_Calc_TS.ipynb
-3_Build_DataBase.ipynb
-4_Benchmark.ipynb
-5_Modeling.ipynb
-6_Draw_Figures.ipynb
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
 ```
 
-For reviewer-style reuse without the original Gaussian folders, the recommended path is:
+On Windows PowerShell:
 
-1. Use `3_Build_DataBase.ipynb` only for checked-in database inspection and summary analysis cells.
-2. Use `4_Benchmark.ipynb` from the benchmark-result loading section onward.
-3. Use `5_Modeling.ipynb` from the precomputed descriptor-loading section onward.
-4. Use `6_Draw_Figures.ipynb` to regenerate manuscript and SI figures from the checked-in data products.
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+```
 
-If you only want the final structured dataset, start from the existing files:
+### Option 2: conda
 
-- `BorylXAT-DB.db`
-- `BorylXAT-DB.parquet`
-- `Data/descriptor/*.pkl`
+```bash
+conda env create -f environment.yml
+conda activate borylxat-db
+```
 
-If the two database files are not present after cloning the code repository, download them from the Zenodo dataset record and place them in the repository root:
+### Option 3: uv
+
+```bash
+uv sync --extra revision
+```
+
+Use the `revision` extra when you want optional `xgboost` support for the revision baseline notebook.
+
+## Data Files and What They Are For
+
+The repository already includes the main released data files in the current workspace. If they are missing after a fresh clone, download them from Zenodo and place them in the repository root.
+
+| File | Purpose | Needed for |
+| --- | --- | --- |
+| `BorylXAT-DB.db` | released ASE structural database | `3_Build_DataBase.ipynb`, `5_Modeling.ipynb`, figure regeneration, direct database inspection |
+| `BorylXAT-DB.parquet` | flattened reaction/structure export | downstream tabular analysis and quick inspection |
+| `BorylXAT-DB_qh_update.db` | QHARM-updated database | QHARM revision notebooks |
+| `Data/TS/Borane_all.csv` | curated public reaction table | modeling and BEP workflows |
+| `Data/TS/result_filter_extended.csv` | extended reaction-space table used by revision analyses | thermodynamic-filter and coverage notebooks |
+| `Data/csvs/Benchmark.csv` | benchmark summary table | `4_Benchmark.ipynb` reviewer-runnable section |
+| `Data/csvs/Experiment.csv` | experimental validation input table | `revision_JACS_Experiment.ipynb` |
+| `Data/descriptor/*.pkl` | precomputed descriptor maps | `5_Modeling.ipynb`, `5_Modeling_xTB.ipynb`, revision modeling notebooks |
+
+If needed, the two main released database files can be downloaded with:
 
 ```bash
 curl -L -o BorylXAT-DB.db "https://zenodo.org/records/20134535/files/BorylXAT-DB.db?download=1"
@@ -232,7 +139,117 @@ Invoke-WebRequest -Uri "https://zenodo.org/records/20134535/files/BorylXAT-DB.db
 Invoke-WebRequest -Uri "https://zenodo.org/records/20134535/files/BorylXAT-DB.parquet?download=1" -OutFile "BorylXAT-DB.parquet"
 ```
 
-For programmatic access to the ASE database:
+## Notebook Guide
+
+### Main notebooks
+
+| Notebook | Scope | Reviewer-runnable from released files? | Main required inputs |
+| --- | --- | --- | --- |
+| `1_Calc_Reactant.ipynb` | reactant preparation, enumeration, xTB conformers, Gaussian setup | no, documents provenance workflow | raw calculation workspace, Gaussian, xTB/CREST |
+| `2_Calc_TS.ipynb` | TS guesses, constrained optimization, TS search, IRC workflow | no, documents provenance workflow | raw calculation workspace, Gaussian |
+| `3_Build_DataBase.ipynb` | database build plus released-database inspection | yes for inspection sections | `BorylXAT-DB.db`, `BorylXAT-DB.parquet` |
+| `4_Benchmark.ipynb` | benchmark analysis | yes for released analysis sections | `Data/csvs/Benchmark.csv` |
+| `5_Modeling.ipynb` | DFT-descriptor CatBoost modeling | yes | `Data/TS/Borane_all.csv`, `Data/descriptor/BNdes_new2.pkl`, `Data/descriptor/Cldes_new2.pkl` |
+| `5_Modeling_xTB.ipynb` | xTB-descriptor modeling | yes | `Data/TS/Borane_all.csv`, `Data/descriptor/BNdes_xtb.pkl`, `Data/descriptor/Cldes_xtb.pkl` |
+| `6_Draw_Figures.ipynb` | consolidated manuscript and SI figures | yes | released CSV, descriptor, database, and output files |
+
+### Revision notebooks added for reviewer response
+
+| Notebook | Purpose | Extra notes |
+| --- | --- | --- |
+| `revision_ml_baseline_ablation_bep_dependence.ipynb` | ML baselines, ablations, BEP-dependence analysis | `xgboost` is optional but recommended |
+| `revision_thermodynamic_filter_BEP_ML.ipynb` | thermodynamic-filter auxiliary-set analysis | uses released/revision CSV outputs |
+| `revision_JACS_Experiment.ipynb` | external experimental trend validation | uses `Data/csvs/Experiment.csv` and `output/jacs_experiment/` |
+| `revision_qharm_barrier_analysis.ipynb` | RRHO vs QHARM barrier comparison | needs `BorylXAT-DB_qh_update.db` |
+| `revision_qharm_modeling.ipynb` | QHARM-updated modeling analysis | prefers QHARM descriptor maps |
+| `revision_basis_set_bond_length_comparison.ipynb` | 6-31G(d) vs 6-31+G(d) geometry sensitivity | uses released revision output CSV files |
+| `7_QHARM_Thermodynamic_Filter_Coverage.ipynb` | QHARM favorable-domain coverage summary | uses released/revision CSV outputs |
+
+The notebooks use the following review tags:
+
+| Tag | Meaning |
+| --- | --- |
+| `[REVIEWER-RUNNABLE]` | should run from files included in this repository or the released Zenodo package |
+| `[RAW-GAUSSIAN/E:/work]` | depends on the historical raw Gaussian/xTB workspace |
+| `[OPTIONAL-DESCRIPTOR-GENERATION]` | expensive descriptor generation that can usually be skipped because precomputed descriptor files are shipped |
+
+## Repository Layout
+
+```text
+.
+|-- DFTStructureGenerator/     reusable Python modules for parsing, descriptors, database building, and plotting
+|-- Data/
+|   |-- ChemDraw/              ChemDraw source files for reactant libraries
+|   |-- csvs/                  intermediate and released summary CSV tables
+|   |-- descriptor/            released descriptor pickle files
+|   `-- TS/                    released TS-level CSV tables and coordinates
+|-- Figure/                    manuscript and SI figure exports
+|-- output/                    revision analysis outputs and executed notebooks
+|-- 1_Calc_Reactant.ipynb
+|-- 2_Calc_TS.ipynb
+|-- 3_Build_DataBase.ipynb
+|-- 4_Benchmark.ipynb
+|-- 5_Modeling.ipynb
+|-- 5_Modeling_xTB.ipynb
+|-- 6_Draw_Figures.ipynb
+|-- revision_*.ipynb
+|-- 7_QHARM_Thermodynamic_Filter_Coverage.ipynb
+`-- Database_Structure.md
+```
+
+## Core Python Modules
+
+`DFTStructureGenerator/` contains the reusable workflow code:
+
+- `borane_xat_workflow.py`: reaction-site detection, component combination generation, DFT job preparation, TS structure generation, and summary export
+- `Build_DataBase.py`: builds `BorylXAT-DB.db` and `BorylXAT-DB.parquet`
+- `descriptor.py`: descriptor-map generation and ML feature assembly
+- `thermochemistry.py`: RRHO/QHARM database access helpers used by revision notebooks
+- `logfile_process.py`: Gaussian log parsing
+- `xtb_process.py`: xTB/CREST conformer workflow helpers
+- `mol_manipulation.py`: geometry transforms and Gaussian input helpers
+- `FormatConverter.py`: conversions among RDKit, XYZ, and Gaussian-related formats
+- `draw.py`: plotting helpers used across notebooks
+- `project_paths.py`: repository-aware path helpers and the raw-workspace environment-variable hook
+
+## Raw-Calculation Path Notes
+
+The historical raw-calculation workspace was organized under `E:/work/...`. Public reviewer-runnable sections avoid hard dependence on that directory, but full provenance reruns still expect a similar layout.
+
+The reusable path helper is:
+
+- environment variable: `BORYLXAT_RAW_CALC_ROOT`
+- default fallback: `E:/work/B_Cl_Nu`
+
+If you need to point the provenance notebooks to a local archive, set:
+
+```powershell
+$env:BORYLXAT_RAW_CALC_ROOT = "D:\\path\\to\\raw\\workspace"
+```
+
+## Typical Usage
+
+For full provenance reruns:
+
+```text
+1_Calc_Reactant.ipynb
+2_Calc_TS.ipynb
+3_Build_DataBase.ipynb
+4_Benchmark.ipynb
+5_Modeling.ipynb
+5_Modeling_xTB.ipynb
+6_Draw_Figures.ipynb
+```
+
+For reviewer-style reuse from released files only:
+
+1. Use `3_Build_DataBase.ipynb` for database inspection only.
+2. Use `4_Benchmark.ipynb` from the checked-in `Benchmark.csv` loading section onward.
+3. Use `5_Modeling.ipynb` or `5_Modeling_xTB.ipynb` from descriptor loading onward.
+4. Use the revision notebooks for the specific reviewer-response analyses.
+5. Use `6_Draw_Figures.ipynb` to regenerate manuscript and SI figures.
+
+## Programmatic Access Example
 
 ```python
 from ase.db import connect
@@ -243,39 +260,9 @@ print(len(ts_rows))
 print(ts_rows[0].key_value_pairs)
 ```
 
-## Code Availability for Review
+## Notes
 
-The repository is organized so that reviewers can inspect the released dataset and regenerate the main analysis/figure outputs without access to the original private calculation tree.
-
-Reviewer-runnable entry points:
-
-- `3_Build_DataBase.ipynb`: database inspection and summary analysis using the checked-in ASE/Parquet files
-- `4_Benchmark.ipynb`: benchmark method analysis from `Data/csvs/Benchmark_Result.csv`
-- `5_Modeling.ipynb`: descriptor loading, CatBoost model validation, feature importance, OOD analysis, and Figure 6 exports from checked-in descriptor files
-- `6_Draw_Figures.ipynb`: manuscript/SI figure regeneration from checked-in CSV/database products
-
-Full provenance/rerun entry points:
-
-- `1_Calc_Reactant.ipynb`: reactant enumeration, xTB conformer-search setup, Gaussian optimization/SPE setup, and reactant-table parsing
-- `2_Calc_TS.ipynb`: TS guess generation, constrained optimization, TS search, SPE correction, IRC validation, and TS CSV completion
-- raw sections of `3_Build_DataBase.ipynb` and `4_Benchmark.ipynb`: parsing original Gaussian logs and collecting benchmark structures/results
-
-The full provenance route requires Gaussian, xTB/CREST, a PBS-style HPC environment, and path adjustment for the historical `E:/work` calculation folders. For standard review, use sections marked `[REVIEWER-RUNNABLE]` and skip sections marked `[RAW-GAUSSIAN/E:/work]`. In `5_Modeling.ipynb`, skip `[OPTIONAL-DESCRIPTOR-GENERATION]` unless descriptor regeneration is specifically required; the precomputed descriptor maps in `Data/descriptor/` are intended to save review time.
-
-## Notes for Reuse
-
-- Naming conventions such as `B_00001`, `LB_00001`, `Cl_00001_r`, and `B_00001_LB_00001_Cl_00001` are central to the whole workflow.
-- Many scripts assume the historical folder layout used for HPC calculations, so path adjustments may be needed before full reruns.
-- The repository contains generated artifacts; reproducing every calculation from scratch requires the original Gaussian/xTB runtime environment.
-- For manuscript review, prefer cells marked `[REVIEWER-RUNNABLE]` and use the checked-in database, benchmark table, and descriptor pickle files unless full Gaussian-level provenance regeneration is needed.
-- The manuscript-facing Lewis base count is 386, while the database retains 387 standalone `LB` entries because `LB_00623` is kept for provenance but is absent from stable B-LB complexes and TS entries.
-
-## Repository Status
-
-This repository already serves well as:
-
-- a data-packaged computational chemistry project
-- a reproducible record of the boryl-radical-mediated C–Cl atom-transfer workflow
-- a starting point for mechanism analysis and descriptor-based ML on main-group radical reactions
-
-Potential future cleanup items include expanding `pyproject.toml`, adding a frozen environment file, and exposing the notebook workflow through a small CLI.
+- `main.py` is only a placeholder; the real workflow lives in the notebooks and `DFTStructureGenerator/`.
+- The reviewer-runnable path is intentionally separated from the full Gaussian/xTB provenance path.
+- `Data/csvs/Benchmark_Result.csv` was retired; the current benchmark table is `Data/csvs/Benchmark.csv`.
+- QHARM revision analyses use `BorylXAT-DB_qh_update.db` and the QHARM descriptor files under `Data/descriptor/`.
