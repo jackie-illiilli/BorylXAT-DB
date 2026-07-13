@@ -1,0 +1,9 @@
+species_class,calc_stage,n,mean_s2,median_s2,p95_s2,max_s2,high_s2_n,high_s2_frac,species_label,calc_stage_label
+B_radical,opt_freq,55,0.7542927272727272,0.7519,0.7667999999999999,0.7782,0,0.0,B radical,Geometry optimization / frequency
+BN_complex_r,opt_freq,4271,0.7631690704752986,0.7622,0.7773,0.8096,6,0.0014048232264106766,B-LB radical reactant complex,Geometry optimization / frequency
+C_radical_from_Cl_p,opt_freq,178,0.7599533707865169,0.7556,0.7794,0.7884,0,0.0,Cl-derived carbon radical,Geometry optimization / frequency
+Transition_state,opt_freq,8980,0.7642095100222717,0.7641,0.7722,0.8323,16,0.0017817371937639199,Transition state,Geometry optimization / frequency
+B_radical,single_point,55,0.7556636363636364,0.7527,0.77347,0.7844,0,0.0,B radical,Single-point electronic energy
+BN_complex_r,single_point,4271,0.7706896979630062,0.7688,0.7948,0.8494,106,0.02481854366658862,B-LB radical reactant complex,Single-point electronic energy
+C_radical_from_Cl_p,single_point,178,0.7635162921348315,0.7567,0.7938649999999999,0.8056,3,0.016853932584269662,Cl-derived carbon radical,Single-point electronic energy
+Transition_state,single_point,8980,0.7780453006681515,0.7782,0.7954,0.9708,186,0.02071269487750557,Transition state,Single-point electronic energy
