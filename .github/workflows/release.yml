@@ -1,0 +1,49 @@
+name: Build and publish release
+
+on:
+  push:
+    tags:
+      - "v*" # 推送 v1.0.0、v2.3.1 等标签时触发
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get version
+        id: version
+        run: echo "version=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+
+      - name: Package repository
+        run: |
+          PACKAGE_NAME="${{ github.event.repository.name }}-${{ steps.version.outputs.version }}"
+
+          mkdir -p dist
+
+          # 打包仓库内容，排除 Git 和工作流产物目录
+          zip -r "dist/${PACKAGE_NAME}.zip" . \
+            -x ".git/*" \
+            -x ".github/*" \
+            -x "dist/*"
+
+          tar \
+            --exclude=".git" \
+            --exclude=".github" \
+            --exclude="dist" \
+            -czf "dist/${PACKAGE_NAME}.tar.gz" .
+
+      - name: Create GitHub Release and upload packages
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ steps.version.outputs.version }}" \
+            dist/*.zip \
+            dist/*.tar.gz \
+            --title "${{ steps.version.outputs.version }}" \
+            --generate-notes
