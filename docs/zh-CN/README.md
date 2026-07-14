@@ -5,7 +5,7 @@
 本仓库包含 **BorylXAT-DB** 的工作流代码、已发布数据接口以及论文和审稿修订阶段使用的分析 notebook。项目聚焦于路易斯碱配位硼自由基介导的 C-Cl 原子转移反应，并提供从结构生成、过渡态搜索到描述符建模和统计分析的完整记录。
 
 公开代码仓库：<https://github.com/jackie-illiilli/BorylXAT-DB>  
-Zenodo 数据归档：<https://doi.org/10.5281/zenodo.20134535>
+Zenodo 数据归档：<https://doi.org/10.5281/zenodo.21330198>
 
 ## 仓库覆盖内容
 
@@ -128,15 +128,15 @@ uv sync --extra revision
 如需下载主数据库文件，可使用：
 
 ```bash
-curl -L -o BorylXAT-DB.db "https://zenodo.org/records/20134535/files/BorylXAT-DB.db?download=1"
-curl -L -o BorylXAT-DB.parquet "https://zenodo.org/records/20134535/files/BorylXAT-DB.parquet?download=1"
+curl -L -o BorylXAT-DB.db "https://zenodo.org/records/21330198/files/BorylXAT-DB.db?download=1"
+curl -L -o BorylXAT-DB.parquet "https://zenodo.org/records/21330198/files/BorylXAT-DB.parquet?download=1"
 ```
 
 Windows PowerShell：
 
 ```powershell
-Invoke-WebRequest -Uri "https://zenodo.org/records/20134535/files/BorylXAT-DB.db?download=1" -OutFile "BorylXAT-DB.db"
-Invoke-WebRequest -Uri "https://zenodo.org/records/20134535/files/BorylXAT-DB.parquet?download=1" -OutFile "BorylXAT-DB.parquet"
+Invoke-WebRequest -Uri "https://zenodo.org/records/21330198/files/BorylXAT-DB.db?download=1" -OutFile "BorylXAT-DB.db"
+Invoke-WebRequest -Uri "https://zenodo.org/records/21330198/files/BorylXAT-DB.parquet?download=1" -OutFile "BorylXAT-DB.parquet"
 ```
 
 ## Notebook 说明

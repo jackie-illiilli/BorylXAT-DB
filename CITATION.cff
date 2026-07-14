@@ -5,9 +5,9 @@ type: dataset
 version: 1.0.0
 date-released: 2026-05-04
 repository-code: "https://github.com/jackie-illiilli/BorylXAT-DB"
-url: "https://doi.org/10.5281/zenodo.20134535"
+url: "https://doi.org/10.5281/zenodo.21330198"
 license: "CC-BY-4.0"
-doi: "10.5281/zenodo.20134535"
+doi: "10.5281/zenodo.21330198"
 authors:
   - name: "BorylXAT-DB contributors"
 preferred-citation:

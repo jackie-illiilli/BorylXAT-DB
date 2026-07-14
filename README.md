@@ -5,7 +5,7 @@
 This repository contains the workflow, released data interfaces, and analysis notebooks for **BorylXAT-DB**, a quantum-chemistry dataset for Lewis-base-coordinated boryl-radical-mediated C-Cl atom transfer.
 
 Public code repository: <https://github.com/jackie-illiilli/BorylXAT-DB>  
-Zenodo archive for large files and released databases: <https://doi.org/10.5281/zenodo.20134535>
+Zenodo archive for large files and released databases: <https://doi.org/10.5281/zenodo.21330198>
 
 ## What This Repository Covers
 
@@ -128,15 +128,15 @@ The repository already includes the main released data files in the current work
 If needed, the two main released database files can be downloaded with:
 
 ```bash
-curl -L -o BorylXAT-DB.db "https://zenodo.org/records/20134535/files/BorylXAT-DB.db?download=1"
-curl -L -o BorylXAT-DB.parquet "https://zenodo.org/records/20134535/files/BorylXAT-DB.parquet?download=1"
+curl -L -o BorylXAT-DB.db "https://zenodo.org/records/21330198/files/BorylXAT-DB.db?download=1"
+curl -L -o BorylXAT-DB.parquet "https://zenodo.org/records/21330198/files/BorylXAT-DB.parquet?download=1"
 ```
 
 On Windows PowerShell:
 
 ```powershell
-Invoke-WebRequest -Uri "https://zenodo.org/records/20134535/files/BorylXAT-DB.db?download=1" -OutFile "BorylXAT-DB.db"
-Invoke-WebRequest -Uri "https://zenodo.org/records/20134535/files/BorylXAT-DB.parquet?download=1" -OutFile "BorylXAT-DB.parquet"
+Invoke-WebRequest -Uri "https://zenodo.org/records/21330198/files/BorylXAT-DB.db?download=1" -OutFile "BorylXAT-DB.db"
+Invoke-WebRequest -Uri "https://zenodo.org/records/21330198/files/BorylXAT-DB.parquet?download=1" -OutFile "BorylXAT-DB.parquet"
 ```
 
 ## Notebook Guide
