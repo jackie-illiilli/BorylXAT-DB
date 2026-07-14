@@ -266,3 +266,14 @@ print(ts_rows[0].key_value_pairs)
 - The reviewer-runnable path is intentionally separated from the full Gaussian/xTB provenance path.
 - `Data/csvs/Benchmark_Result.csv` was retired; the current benchmark table is `Data/csvs/Benchmark.csv`.
 - QHARM revision analyses use `BorylXAT-DB_qh_update.db` and the QHARM descriptor files under `Data/descriptor/`.
+  
+## Data and code availability
+
+- BorylXAT-DB dataset and auxiliary data:
+  https://doi.org/10.5281/zenodo.21330198
+
+- Versioned archive of this code repository:
+  https://doi.org/10.5281/zenodo.21348835
+
+- Live development repository:
+  https://github.com/jackie-illiilli/BorylXAT-DB
