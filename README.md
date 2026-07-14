@@ -1,6 +1,6 @@
 # BorylXAT-DB: a transition-state database for boryl-radical-mediated C-Cl atom transfer
 
-[中文说明](docs/zh-CN/README.md) | [Database Structure](Database_Structure.md) | [数据库结构说明](docs/zh-CN/Database_Structure.md) DOI: 10.5281/zenodo.21348836
+[中文说明](docs/zh-CN/README.md) | [Database Structure](Database_Structure.md) | [数据库结构说明](docs/zh-CN/Database_Structure.md) [![DOI](https://zenodo.org/badge/1236540402.svg)](https://doi.org/10.5281/zenodo.21348835)
 
 This repository contains the workflow, released data interfaces, and analysis notebooks for **BorylXAT-DB**, a quantum-chemistry dataset for Lewis-base-coordinated boryl-radical-mediated C-Cl atom transfer.
 
